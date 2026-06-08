@@ -7,8 +7,8 @@
         Title="Mix Gas-V1" 
         Icon="pack://application:,,,/Assets/gas_mixer_logo.png"
         Height="768" Width="1280"
-        Background="#0B0F19"
-        TextElement.Foreground="#F9FAFB"
+        Background="{DynamicResource BgBrush}"
+        TextElement.Foreground="{DynamicResource TextPriBrush}"
         FontFamily="Segoe UI, Helvetica, Arial, sans-serif"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized">
@@ -490,8 +490,8 @@
 
                                 <!-- Recipe step table Grid -->
                                 <Border Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Height="260" Margin="0,4,0,4">
-                                    <DataGrid x:Name="DgridRecipe" AutoGenerateColumns="False" Background="#0F172A" Foreground="{DynamicResource TextPriBrush}" 
-                                              RowBackground="{DynamicResource CardBrush}" AlternatingRowBackground="#0F172A" BorderBrush="{DynamicResource BorderBrush}" 
+                                    <DataGrid x:Name="DgridRecipe" AutoGenerateColumns="False" Background="{DynamicResource BgBrush}" Foreground="{DynamicResource TextPriBrush}" 
+                                              RowBackground="{DynamicResource CardBrush}" AlternatingRowBackground="{DynamicResource BgBrush}" BorderBrush="{DynamicResource BorderBrush}" 
                                               GridLinesVisibility="All" VerticalGridLinesBrush="{DynamicResource BorderBrush}" HorizontalGridLinesBrush="{DynamicResource BorderBrush}" 
                                               HeadersVisibility="Column" FontSize="11">
                                         <DataGrid.ContextMenu>
@@ -545,7 +545,7 @@
                     <!-- Tab 1: Scada canvas animation view -->
                     <TabItem Header="⬡ Scada" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}" Padding="15,4">
                         <Grid Background="{DynamicResource BgBrush}">
-                            <Canvas x:Name="ScadaCanvas" Background="#080C14" ClipToBounds="True"/>
+                            <Canvas x:Name="ScadaCanvas" Background="Transparent" ClipToBounds="True"/>
                             
                             <!-- Simulator status tag in top right of SCADA -->
                             <Border VerticalAlignment="Top" HorizontalAlignment="Right" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="8,4" CornerRadius="4" Margin="6">

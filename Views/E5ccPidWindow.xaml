@@ -3,21 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Omron E5CC PID &amp; Advanced Controls" 
         Height="400" Width="480"
-        Background="#1E293B" Foreground="#F8FAFC"
+        Background="{DynamicResource BgBrush}" Foreground="{DynamicResource TextPriBrush}"
         FontFamily="Segoe UI, Arial"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
 
     <Window.Resources>
-        <Style TargetType="TextBox">
-            <Setter Property="Background" Value="#0F172A"/>
-            <Setter Property="Foreground" Value="#F8FAFC"/>
-            <Setter Property="BorderBrush" Value="#475569"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="4"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Height" Value="26"/>
-        </Style>
+
         <Style TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
             <Setter Property="Foreground" Value="White"/>
@@ -35,9 +27,9 @@
             <RowDefinition Height="Auto"/> <!-- Actions -->
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="TEMPERATURE CONTROLLER TUNING (E5CC Slave 1)" FontSize="12" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,10"/>
+        <TextBlock Grid.Row="0" Text="TEMPERATURE CONTROLLER TUNING (E5CC Slave 1)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" Margin="0,0,0,10"/>
 
-        <TabControl Grid.Row="1" Background="#1E293B" BorderBrush="#334155" BorderThickness="1">
+        <TabControl Grid.Row="1" Background="{DynamicResource BgBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
             <!-- PID & AT Tab -->
             <TabItem Header="PID &amp; Auto-Tune">
                 <Grid Margin="10">
@@ -46,7 +38,7 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <GroupBox Header="PID Coefficients" BorderBrush="#334155" Foreground="#94A3B8" Padding="10" Grid.Row="0">
+                    <GroupBox Header="PID Coefficients" BorderBrush="{DynamicResource BorderBrush}" Foreground="{DynamicResource TextSecBrush}" Padding="10" Grid.Row="0">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -54,21 +46,21 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Margin="4">
-                                <TextBlock Text="P (Prop Band):" Foreground="#94A3B8" FontSize="11" Margin="0,0,0,2"/>
+                                <TextBlock Text="P (Prop Band):" Foreground="{DynamicResource TextSecBrush}" FontSize="11" Margin="0,0,0,2"/>
                                 <TextBox x:Name="TxtP" Text="10.0"/>
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="4">
-                                <TextBlock Text="I (Integral s):" Foreground="#94A3B8" FontSize="11" Margin="0,0,0,2"/>
+                                <TextBlock Text="I (Integral s):" Foreground="{DynamicResource TextSecBrush}" FontSize="11" Margin="0,0,0,2"/>
                                 <TextBox x:Name="TxtI" Text="240"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2" Margin="4">
-                                <TextBlock Text="D (Deriv s):" Foreground="#94A3B8" FontSize="11" Margin="0,0,0,2"/>
+                                <TextBlock Text="D (Deriv s):" Foreground="{DynamicResource TextSecBrush}" FontSize="11" Margin="0,0,0,2"/>
                                 <TextBox x:Name="TxtD" Text="40.0"/>
                             </StackPanel>
                         </Grid>
                     </GroupBox>
 
-                    <GroupBox Header="Auto-Tune (AT) Control" BorderBrush="#334155" Foreground="#94A3B8" Padding="10" Grid.Row="1" Margin="0,8,0,0">
+                    <GroupBox Header="Auto-Tune (AT) Control" BorderBrush="{DynamicResource BorderBrush}" Foreground="{DynamicResource TextSecBrush}" Padding="10" Grid.Row="1" Margin="0,8,0,0">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <Button x:Name="BtnStartAt" Content="▶ Start Auto-Tune" Click="OnStartAtClick" Width="130" Background="#10B981" Margin="0,0,10,0"/>
                             <Button x:Name="BtnStopAt" Content="⏹ Stop Auto-Tune" Click="OnStopAtClick" Width="130" Background="#DC2626"/>

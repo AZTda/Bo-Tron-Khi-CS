@@ -228,12 +228,15 @@ namespace Bo_Tron_Khi_CS
             bool carrierToChamber = !_valveRelay1;
             bool mixToChamber = _valveRelay1;
 
-            string toChamberColor = (carrierToChamber && carrierActive) ? GasColors[0] : (mixToChamber && mixActive) ? PipeMixColor : "#1E293B";
-            string toExhaustColor = (!carrierToChamber && carrierActive) ? GasColors[0] : (!mixToChamber && mixActive) ? PipeMixColor : "#1E293B";
+            bool isDark = BtnTheme.Content.ToString().Contains("Light");
+            string inactiveColor = isDark ? "#1E293B" : "#CBD5E1";
+
+            string toChamberColor = (carrierToChamber && carrierActive) ? GasColors[0] : (mixToChamber && mixActive) ? PipeMixColor : inactiveColor;
+            string toExhaustColor = (!carrierToChamber && carrierActive) ? GasColors[0] : (!mixToChamber && mixActive) ? PipeMixColor : inactiveColor;
 
             // Static Colors
-            Brush inactivePipeBrush = new SolidColorBrush(Color.FromRgb(30, 41, 59));
-            Brush casingBrush = new SolidColorBrush(Color.FromRgb(15, 23, 42));
+            Brush inactivePipeBrush = isDark ? new SolidColorBrush(Color.FromRgb(30, 41, 59)) : new SolidColorBrush(Color.FromRgb(203, 213, 225));
+            Brush casingBrush = isDark ? new SolidColorBrush(Color.FromRgb(15, 23, 42)) : new SolidColorBrush(Color.FromRgb(255, 255, 255));
 
             // Grid backgrounds
             DrawGridLines(W, H);
@@ -261,18 +264,25 @@ namespace Bo_Tron_Khi_CS
 
             string[] gasNames = new string[] { _config.carrier_gas, "Diluent", "Gas1 Low", "Gas1 High", "Gas 2", "Gas 3" };
 
+            // Theme-aware brushes for SCADA elements
+            Brush pillBg = isDark ? new SolidColorBrush(Color.FromRgb(15, 23, 42)) : new SolidColorBrush(Color.FromRgb(243, 244, 246));
+            Brush pillText = isDark ? Brushes.White : new SolidColorBrush(Color.FromRgb(9, 30, 66));
+            Brush mfcBg = isDark ? new SolidColorBrush(Color.FromRgb(11, 15, 25)) : new SolidColorBrush(Color.FromRgb(249, 250, 251));
+            Brush mfcBorderBrush = isDark ? new SolidColorBrush(Color.FromRgb(55, 65, 81)) : new SolidColorBrush(Color.FromRgb(209, 213, 219));
+            Brush mfcLabelBrush = isDark ? new SolidColorBrush(Color.FromRgb(148, 163, 184)) : new SolidColorBrush(Color.FromRgb(75, 85, 99));
+
             for (int i = 0; i < 6; i++)
             {
                 double y = mfc_y_start + i * mfc_spacing;
                 string c = GasColors[i];
 
                 // Source pill body
-                DrawRoundedRect(src_x, y - inlet_h/2, src_x + inlet_w, y + inlet_h/2, 6, new SolidColorBrush(Color.FromRgb(15, 23, 42)), (Brush)new BrushConverter().ConvertFromString(c), 1.5);
+                DrawRoundedRect(src_x, y - inlet_h/2, src_x + inlet_w, y + inlet_h/2, 6, pillBg, (Brush)new BrushConverter().ConvertFromString(c), 1.5);
                 DrawLed(src_x + 11, y, 3.5, c);
-                DrawText(src_x + 43, y, gasNames[i], 9, Brushes.White, true);
+                DrawText(src_x + 43, y, gasNames[i], 9, pillText, true);
 
                 // Pipe segment: Inlet -> MFC input
-                string pColor = flowActive[i] ? c : "#1E293B";
+                string pColor = flowActive[i] ? c : inactiveColor;
                 DrawPipeWithCasing(src_x + inlet_w, y, mfc_x, y, pColor, 4.0);
             }
 
@@ -287,17 +297,16 @@ namespace Bo_Tron_Khi_CS
                 string c = GasColors[i];
 
                 // Highlight border if manual flow rate editable is active (simplification)
-                Brush borderBrush = new SolidColorBrush(Color.FromRgb(55, 65, 81));
-                DrawRoundedRect(x1, y1, x2, y2, 6, new SolidColorBrush(Color.FromRgb(11, 15, 25)), borderBrush, 1.5);
+                DrawRoundedRect(x1, y1, x2, y2, 6, mfcBg, mfcBorderBrush, 1.5);
 
                 // Indicator line left
                 DrawPipe(x1 + 3, y1 + 5, x1 + 3, y2 - 5, (Brush)new BrushConverter().ConvertFromString(c), 3.0);
 
                 // Name header
-                DrawText(x1 + mfc_w / 2, y1 + 13, $"MFC {i + 1}", 8, new SolidColorBrush(Color.FromRgb(148, 163, 184)), true);
+                DrawText(x1 + mfc_w / 2, y1 + 13, $"MFC {i + 1}", 8, mfcLabelBrush, true);
 
                 // Setpoint label above box
-                DrawText(x1 + mfc_w / 2, y1 - 8, $"SP: {sps[i]:F1}", 8, new SolidColorBrush(Color.FromRgb(148, 163, 184)), true);
+                DrawText(x1 + mfc_w / 2, y1 - 8, $"SP: {sps[i]:F1}", 8, mfcLabelBrush, true);
 
                 // PV Label inside box
                 DrawText(x1 + mfc_w / 2, y1 + 30, $"{pvs[i]:F1}", 12, (Brush)new BrushConverter().ConvertFromString(c), true, true);
@@ -318,7 +327,7 @@ namespace Bo_Tron_Khi_CS
             // 3. Draw Branch segments
             // Carrier Gas segment (MFC 1)
             double carrier_y = mfc_y_start;
-            string carrierPipeColor = carrierActive ? GasColors[0] : "#1E293B";
+            string carrierPipeColor = carrierActive ? GasColors[0] : inactiveColor;
             DrawPipeWithCasing(mfc_out, carrier_y, junc_x + offset_junc, carrier_y, carrierPipeColor, 5.0);
             
             double valve_top_y = valve_y;
@@ -329,12 +338,12 @@ namespace Bo_Tron_Khi_CS
             for (int i = 1; i < 6; i++)
             {
                 double y = mfc_y_start + i * mfc_spacing;
-                string pColor = flowActive[i] ? GasColors[i] : "#1E293B";
+                string pColor = flowActive[i] ? GasColors[i] : inactiveColor;
                 DrawPipeWithCasing(mfc_out, y, junc_x, y, pColor, 4.0);
             }
 
             // Vertical mixed manifold
-            string manifoldColor = mixActive ? PipeMixColor : "#1E293B";
+            string manifoldColor = mixActive ? PipeMixColor : inactiveColor;
             DrawPipeWithCasing(junc_x, mfc_y_start + mfc_spacing, junc_x, mfc_y_start + 5 * mfc_spacing, manifoldColor, 6.0);
 
             // Manifold outlet horizontal Segment to valve bot port
@@ -343,12 +352,12 @@ namespace Bo_Tron_Khi_CS
             DrawPipeWithCasing(valve_x, valve_bot_y, valve_x, valve_y + valve_r, manifoldColor, 6.0);
 
             // 4. 3-Way Valve Routing & Knob
-            DrawGlowCircle(valve_x, valve_y, valve_r, "#0B0F19");
+            DrawGlowCircle(valve_x, valve_y, valve_r, isDark ? "#0B0F19" : "#F3F4F6");
             
             // Triangle Ports
-            DrawValveTriangle(valve_x - valve_r, valve_y, -90, carrierActive ? GasColors[0] : "#1E293B");
+            DrawValveTriangle(valve_x - valve_r, valve_y, -90, carrierActive ? GasColors[0] : inactiveColor);
             DrawValveTriangle(valve_x + valve_r, valve_y, 90, toChamberColor);
-            DrawValveTriangle(valve_x, valve_y + valve_r, 180, mixActive ? PipeMixColor : "#1E293B");
+            DrawValveTriangle(valve_x, valve_y + valve_r, 180, mixActive ? PipeMixColor : inactiveColor);
             DrawValveTriangle(valve_x, valve_y - valve_r, 0, toExhaustColor);
 
             // Routing Lines inside Valve circle
@@ -366,8 +375,8 @@ namespace Bo_Tron_Khi_CS
             }
 
             // Valve Knob
-            DrawGlowCircle(valve_x, valve_y, 5, "#475569");
-            var elKnob = new Ellipse { Width = ts(4), Height = ts(4), Fill = Brushes.White };
+            DrawGlowCircle(valve_x, valve_y, 5, isDark ? "#475569" : "#9CA3AF");
+            var elKnob = new Ellipse { Width = ts(4), Height = ts(4), Fill = isDark ? Brushes.White : new SolidColorBrush(Color.FromRgb(9, 30, 66)) };
             Canvas.SetLeft(elKnob, tx(valve_x - 2));
             Canvas.SetTop(elKnob, ty(valve_y - 2));
             ScadaCanvas.Children.Add(elKnob);
@@ -390,11 +399,15 @@ namespace Bo_Tron_Khi_CS
             DrawPipeWithCasing(exh_branch_x, valve_y - valve_r, exh_branch_x, exh_y, toExhaustColor, 5.0);
             DrawPipeWithCasing(exh_branch_x, exh_y, exh_x, exh_y, toExhaustColor, 5.0);
 
-            // Exhaust pill box
+            // Exhaust pill box & text
             double ep_w = 80;
             double ep_h = 26;
-            DrawRoundedRect(exh_x - ep_w/2, exh_y - ep_h/2, exh_x + ep_w/2, exh_y + ep_h/2, 6, new SolidColorBrush(Color.FromRgb(11, 15, 25)), new SolidColorBrush(Color.FromRgb(55, 65, 81)), 1.0);
-            DrawText(exh_x, exh_y, "Exhaust", 10, new SolidColorBrush(Color.FromRgb(156, 163, 175)), true);
+            Brush exhBg = isDark ? new SolidColorBrush(Color.FromRgb(11, 15, 25)) : new SolidColorBrush(Color.FromRgb(243, 244, 246));
+            Brush exhBorder = isDark ? new SolidColorBrush(Color.FromRgb(55, 65, 81)) : new SolidColorBrush(Color.FromRgb(209, 213, 219));
+            Brush exhText = isDark ? new SolidColorBrush(Color.FromRgb(156, 163, 175)) : new SolidColorBrush(Color.FromRgb(75, 85, 99));
+
+            DrawRoundedRect(exh_x - ep_w/2, exh_y - ep_h/2, exh_x + ep_w/2, exh_y + ep_h/2, 6, exhBg, exhBorder, 1.0);
+            DrawText(exh_x, exh_y, "Exhaust", 10, exhText, true);
 
             // 6. Sensor Chamber viewport, stage and chips
             double cx = cham_x;
@@ -403,19 +416,28 @@ namespace Bo_Tron_Khi_CS
             double hh = cham_h / 2;
 
             // Outer chamber steel shell
-            DrawRoundedRect(cx - hw, cy - hh, cx + hw, cy + hh, 14, new SolidColorBrush(Color.FromRgb(51, 65, 85)), new SolidColorBrush(Color.FromRgb(100, 116, 139)), 2.0);
+            Brush outerShellBg = isDark ? new SolidColorBrush(Color.FromRgb(51, 65, 85)) : new SolidColorBrush(Color.FromRgb(229, 231, 235));
+            Brush outerShellStroke = isDark ? new SolidColorBrush(Color.FromRgb(100, 116, 139)) : new SolidColorBrush(Color.FromRgb(156, 163, 175));
+            DrawRoundedRect(cx - hw, cy - hh, cx + hw, cy + hh, 14, outerShellBg, outerShellStroke, 2.0);
+
             // Inner chamber cavity
-            DrawRoundedRect(cx - hw + 10, cy - hh + 10, cx + hw - 10, cy + hh - 10, 7, new SolidColorBrush(Color.FromRgb(9, 13, 22)), new SolidColorBrush(Color.FromRgb(30, 41, 59)), 1.5);
+            Brush cavityBg = isDark ? new SolidColorBrush(Color.FromRgb(9, 13, 22)) : new SolidColorBrush(Color.FromRgb(249, 250, 251));
+            Brush cavityBorder = isDark ? new SolidColorBrush(Color.FromRgb(30, 41, 59)) : new SolidColorBrush(Color.FromRgb(226, 232, 240));
+            DrawRoundedRect(cx - hw + 10, cy - hh + 10, cx + hw - 10, cy + hh - 10, 7, cavityBg, cavityBorder, 1.5);
 
             // Viewport glass ring & window
             double win_cy = cy - 22;
             double win_r = hw - 20;
-            var elFrame = new Ellipse { Width = ts(win_r * 2 + 6), Height = ts(win_r * 2 + 6), Fill = new SolidColorBrush(Color.FromRgb(71, 85, 105)), Stroke = new SolidColorBrush(Color.FromRgb(30, 41, 59)), StrokeThickness = ts(2) };
+            Brush frameFill = isDark ? new SolidColorBrush(Color.FromRgb(71, 85, 105)) : new SolidColorBrush(Color.FromRgb(226, 232, 240));
+            Brush frameStroke = isDark ? new SolidColorBrush(Color.FromRgb(30, 41, 59)) : new SolidColorBrush(Color.FromRgb(203, 213, 225));
+            var elFrame = new Ellipse { Width = ts(win_r * 2 + 6), Height = ts(win_r * 2 + 6), Fill = frameFill, Stroke = frameStroke, StrokeThickness = ts(2) };
             Canvas.SetLeft(elFrame, tx(cx - win_r - 3));
             Canvas.SetTop(elFrame, ty(win_cy - win_r - 3));
             ScadaCanvas.Children.Add(elFrame);
 
-            var elGlass = new Ellipse { Width = ts(win_r * 2), Height = ts(win_r * 2), Fill = new SolidColorBrush(Color.FromRgb(5, 11, 20)), Stroke = new SolidColorBrush(Color.FromRgb(14, 165, 233)), StrokeThickness = ts(1.5) };
+            Brush glassFill = isDark ? new SolidColorBrush(Color.FromRgb(5, 11, 20)) : new SolidColorBrush(Color.FromRgb(243, 244, 246));
+            Brush glassStroke = isDark ? new SolidColorBrush(Color.FromRgb(14, 165, 233)) : new SolidColorBrush(Color.FromRgb(56, 189, 248));
+            var elGlass = new Ellipse { Width = ts(win_r * 2), Height = ts(win_r * 2), Fill = glassFill, Stroke = glassStroke, StrokeThickness = ts(1.5) };
             Canvas.SetLeft(elGlass, tx(cx - win_r));
             Canvas.SetTop(elGlass, ty(win_cy - win_r));
             ScadaCanvas.Children.Add(elGlass);
@@ -430,18 +452,22 @@ namespace Bo_Tron_Khi_CS
 
             // Chamber Flanges
             // Left inlet flange
-            DrawRoundedRect(cx - hw - 5, cy - 10, cx - hw + 2, cy + 10, 2, new SolidColorBrush(Color.FromRgb(71, 85, 105)), new SolidColorBrush(Color.FromRgb(100, 116, 139)), 1);
+            Brush flangeFill = isDark ? new SolidColorBrush(Color.FromRgb(71, 85, 105)) : new SolidColorBrush(Color.FromRgb(226, 232, 240));
+            Brush flangeStroke = isDark ? new SolidColorBrush(Color.FromRgb(100, 116, 139)) : new SolidColorBrush(Color.FromRgb(203, 213, 225));
+            DrawRoundedRect(cx - hw - 5, cy - 10, cx - hw + 2, cy + 10, 2, flangeFill, flangeStroke, 1);
             // Bottom outlet flange
-            DrawRoundedRect(cx - 15, cy + hh - 2, cx + 15, cy + hh + 5, 2, new SolidColorBrush(Color.FromRgb(71, 85, 105)), new SolidColorBrush(Color.FromRgb(100, 116, 139)), 1);
+            DrawRoundedRect(cx - 15, cy + hh - 2, cx + 15, cy + hh + 5, 2, flangeFill, flangeStroke, 1);
 
             // Chuck pillars
-            DrawRoundedRect(cx - 22, cy + 30, cx - 14, cy + hh - 10, 1, new SolidColorBrush(Color.FromRgb(71, 85, 105)), inactivePipeBrush, 1);
-            DrawRoundedRect(cx + 14, cy + 30, cx + 22, cy + hh - 10, 1, new SolidColorBrush(Color.FromRgb(71, 85, 105)), inactivePipeBrush, 1);
+            DrawRoundedRect(cx - 22, cy + 30, cx - 14, cy + hh - 10, 1, flangeFill, inactivePipeBrush, 1);
+            DrawRoundedRect(cx + 14, cy + 30, cx + 22, cy + hh - 10, 1, flangeFill, inactivePipeBrush, 1);
 
             // Chuck body base
             double chuck_y1 = cy + 20;
             double chuck_y2 = cy + 40;
-            DrawRoundedRect(cx - 38, chuck_y1, cx + 38, chuck_y2, 3, new SolidColorBrush(Color.FromRgb(30, 41, 59)), new SolidColorBrush(Color.FromRgb(71, 85, 105)), 1.5);
+            Brush chuckBodyFill = isDark ? new SolidColorBrush(Color.FromRgb(30, 41, 59)) : new SolidColorBrush(Color.FromRgb(229, 231, 235));
+            Brush chuckBodyStroke = isDark ? new SolidColorBrush(Color.FromRgb(71, 85, 105)) : new SolidColorBrush(Color.FromRgb(186, 195, 208));
+            DrawRoundedRect(cx - 38, chuck_y1, cx + 38, chuck_y2, 3, chuckBodyFill, chuckBodyStroke, 1.5);
             // Copper plate platen
             DrawRoundedRect(cx - 34, chuck_y1, cx + 34, chuck_y1 + 5, 1, new SolidColorBrush(Color.FromRgb(180, 83, 9)), new SolidColorBrush(Color.FromRgb(217, 119, 6)), 1.0);
 
@@ -450,7 +476,8 @@ namespace Bo_Tron_Khi_CS
             double scy = cy + 10;
             double sw = 36;
             double sh = 20;
-            DrawRoundedRect(scx - sw/2, scy - sh/2, scx + sw/2, scy + sh/2, 3, new SolidColorBrush(Color.FromRgb(17, 24, 39)), new SolidColorBrush(Color.FromRgb(202, 138, 4)), 1.5);
+            Brush substrateBg = isDark ? new SolidColorBrush(Color.FromRgb(17, 24, 39)) : new SolidColorBrush(Color.FromRgb(243, 244, 246));
+            DrawRoundedRect(scx - sw/2, scy - sh/2, scx + sw/2, scy + sh/2, 3, substrateBg, new SolidColorBrush(Color.FromRgb(202, 138, 4)), 1.5);
             // Gold pads Left/Right
             DrawRoundedRect(scx - sw/2 + 2, scy - 5, scx - sw/2 + 6, scy + 5, 1, new SolidColorBrush(Color.FromRgb(234, 179, 8)), Brushes.Transparent, 0);
             DrawRoundedRect(scx + sw/2 - 6, scy - 5, scx + sw/2 - 2, scy + 5, 1, new SolidColorBrush(Color.FromRgb(234, 179, 8)), Brushes.Transparent, 0);
@@ -475,37 +502,38 @@ namespace Bo_Tron_Khi_CS
 
             // Probes micropositioner blocks & arms
             // Left block
-            DrawRoundedRect(cx - hw + 14, cy - 28, cx - hw + 28, cy - 10, 2, new SolidColorBrush(Color.FromRgb(51, 65, 85)), inactivePipeBrush, 1.5);
-            DrawGlowCircle(cx - hw + 19, cy - 30.5, 3, "#64748B");
-            DrawGlowCircle(cx - hw + 25, cy - 30.5, 3, "#64748B");
+            Brush probeBg = isDark ? new SolidColorBrush(Color.FromRgb(51, 65, 85)) : new SolidColorBrush(Color.FromRgb(229, 231, 235));
+            DrawRoundedRect(cx - hw + 14, cy - 28, cx - hw + 28, cy - 10, 2, probeBg, inactivePipeBrush, 1.5);
+            DrawGlowCircle(cx - hw + 19, cy - 30.5, 3, isDark ? "#64748B" : "#94A3B8");
+            DrawGlowCircle(cx - hw + 25, cy - 30.5, 3, isDark ? "#64748B" : "#94A3B8");
             DrawPipe(cx - hw + 21, cy - 19, cx - 20, cy - 1, new SolidColorBrush(Color.FromRgb(148, 163, 184)), 2.0);
             DrawPipe(cx - 20, cy - 1, scx - sw/2 + 4, scy - 3, new SolidColorBrush(Color.FromRgb(203, 213, 225)), 0.8);
             DrawGlowCircle(scx - sw/2 + 4, scy - 3, 1.5, "#F59E0B");
 
             // Right block
-            DrawRoundedRect(cx + hw - 28, cy - 28, cx + hw - 14, cy - 10, 2, new SolidColorBrush(Color.FromRgb(51, 65, 85)), inactivePipeBrush, 1.5);
-            DrawGlowCircle(cx + hw - 19, cy - 30.5, 3, "#64748B");
-            DrawGlowCircle(cx + hw - 25, cy - 30.5, 3, "#64748B");
+            DrawRoundedRect(cx + hw - 28, cy - 28, cx + hw - 14, cy - 10, 2, probeBg, inactivePipeBrush, 1.5);
+            DrawGlowCircle(cx + hw - 19, cy - 30.5, 3, isDark ? "#64748B" : "#94A3B8");
+            DrawGlowCircle(cx + hw - 25, cy - 30.5, 3, isDark ? "#64748B" : "#94A3B8");
             DrawPipe(cx + hw - 21, cy - 19, cx + 20, cy - 1, new SolidColorBrush(Color.FromRgb(148, 163, 184)), 2.0);
             DrawPipe(cx + 20, cy - 1, scx + sw/2 - 4, scy - 3, new SolidColorBrush(Color.FromRgb(203, 213, 225)), 0.8);
             DrawGlowCircle(scx + sw/2 - 4, scy - 3, 1.5, "#F59E0B");
 
             // Chamber Output pipe to filter
             double bot_y = 470;
-            DrawPipeWithCasing(cham_x, cy + hh, cham_x, bot_y, "#4B5563", 5.0);
-            DrawText(cham_x, bot_y + 10, "Exhaust Filter", 9, new SolidColorBrush(Color.FromRgb(156, 163, 175)), true);
+            DrawPipeWithCasing(cham_x, cy + hh, cham_x, bot_y, isDark ? "#4B5563" : "#9CA3AF", 5.0);
+            DrawText(cham_x, bot_y + 10, "Exhaust Filter", 9, exhText, true);
 
             // 7. Exhaust Vacuum Pump fan base
             double pump_y = 410;
             double pump_r = 14;
-            string pumpStateColor = _valveRelay2 ? "#10B981" : "#374151";
+            string pumpStateColor = _valveRelay2 ? "#10B981" : (isDark ? "#374151" : "#D1D5DB");
             DrawGlowCircle(cham_x, pump_y, pump_r, pumpStateColor);
 
             // Pump ON/OFF status text
             string pumpLabel = _valveRelay2 ? "PUMP ON" : "PUMP OFF";
             Brush pumpTextBrush = _valveRelay2
                 ? new SolidColorBrush(Color.FromRgb(16, 185, 129))
-                : new SolidColorBrush(Color.FromRgb(100, 116, 139));
+                : (isDark ? new SolidColorBrush(Color.FromRgb(100, 116, 139)) : new SolidColorBrush(Color.FromRgb(75, 85, 99)));
             DrawText(cham_x, pump_y + pump_r + 10, pumpLabel, 9, pumpTextBrush, true);
 
             // Clickable Pump Area
@@ -522,9 +550,9 @@ namespace Bo_Tron_Khi_CS
 
             // Van (Valve) state box
             string valveLabel = _valveRelay1 ? "VALVE: OPEN (Mix → Chamber)" : "VALVE: CLOSED (Carrier → Chamber)";
-            string valveBoxBg = _valveRelay1 ? "#042F1A" : "#081E3F";
+            string valveBoxBg = _valveRelay1 ? (isDark ? "#042F1A" : "#D1FAE5") : (isDark ? "#081E3F" : "#DBEAFE");
             string valveBoxBorder = _valveRelay1 ? "#10B981" : "#3B82F6";
-            string valveBoxText = _valveRelay1 ? "#10B981" : "#93C5FD";
+            string valveBoxText = _valveRelay1 ? (isDark ? "#10B981" : "#065F46") : (isDark ? "#93C5FD" : "#1E40AF");
             DrawRoundedRect(10, info_y - 11, 320, info_y + 11, 6,
                 (Brush)new BrushConverter().ConvertFromString(valveBoxBg),
                 (Brush)new BrushConverter().ConvertFromString(valveBoxBorder), 1.0);
@@ -533,9 +561,9 @@ namespace Bo_Tron_Khi_CS
 
             // Pump state box (to the right of Valve box)
             string pumpBoxLabel = _valveRelay2 ? "● PUMP: ON" : "○ PUMP: OFF";
-            string pumpBoxBg = _valveRelay2 ? "#042F1A" : "#111827";
-            string pumpBoxBorder = _valveRelay2 ? "#10B981" : "#374151";
-            string pumpBoxText = _valveRelay2 ? "#10B981" : "#6B7280";
+            string pumpBoxBg = _valveRelay2 ? (isDark ? "#042F1A" : "#D1FAE5") : (isDark ? "#111827" : "#F3F4F6");
+            string pumpBoxBorder = _valveRelay2 ? "#10B981" : (isDark ? "#374151" : "#D1D5DB");
+            string pumpBoxText = _valveRelay2 ? (isDark ? "#10B981" : "#065F46") : (isDark ? "#6B7280" : "#4B5563");
             DrawRoundedRect(330, info_y - 11, 480, info_y + 11, 6,
                 (Brush)new BrushConverter().ConvertFromString(pumpBoxBg),
                 (Brush)new BrushConverter().ConvertFromString(pumpBoxBorder), 1.0);
@@ -543,19 +571,22 @@ namespace Bo_Tron_Khi_CS
                 (Brush)new BrushConverter().ConvertFromString(pumpBoxText), true);
 
             // Connection Status box (to the right of Pump box)
+            string connBoxBg = isDark ? "#0D1527" : "#F3F4F6";
+            string connBoxBorder = isDark ? "#1E293B" : "#D1D5DB";
+            Brush connTextColor = isDark ? new SolidColorBrush(Color.FromRgb(249, 250, 251)) : new SolidColorBrush(Color.FromRgb(9, 30, 66));
             DrawRoundedRect(490, info_y - 11, 760, info_y + 11, 6,
-                (Brush)new BrushConverter().ConvertFromString("#0D1527"),
-                (Brush)new BrushConverter().ConvertFromString("#1E293B"), 1.0);
+                (Brush)new BrushConverter().ConvertFromString(connBoxBg),
+                (Brush)new BrushConverter().ConvertFromString(connBoxBorder), 1.0);
 
             string commLampColor = (_handler.IsConnected || isSim) ? "#10B981" : "#EF4444";
             
             // Massflow Connection lamp
             DrawLed(505, info_y, 4, commLampColor);
-            DrawText(518, info_y, "Massflow", 9, new SolidColorBrush(Color.FromRgb(249, 250, 251)), false);
+            DrawText(518, info_y, "Massflow", 9, connTextColor, false);
 
             // Temperature Connection lamp
             DrawLed(625, info_y, 4, commLampColor);
-            DrawText(638, info_y, "Temperature", 9, new SolidColorBrush(Color.FromRgb(249, 250, 251)), false);
+            DrawText(638, info_y, "Temperature", 9, connTextColor, false);
 
             // 10. ANIMATED FLOW PARTICLES
             if (carrierActive)
@@ -672,10 +703,11 @@ namespace Bo_Tron_Khi_CS
 
         private void DrawGridLines(double W, double H)
         {
+            bool isDark = BtnTheme.Content.ToString().Contains("Light");
             double grid_size = 40.0 * _scale;
             if (grid_size >= 10.0)
             {
-                Brush gridBrush = new SolidColorBrush(Color.FromRgb(14, 21, 36));
+                Brush gridBrush = isDark ? new SolidColorBrush(Color.FromRgb(14, 21, 36)) : new SolidColorBrush(Color.FromRgb(229, 231, 235));
                 for (double gx = 0; gx < W; gx += grid_size)
                 {
                     var line = new Line { X1 = gx, Y1 = 0, X2 = gx, Y2 = H, Stroke = gridBrush, StrokeThickness = 0.8 };
@@ -689,7 +721,7 @@ namespace Bo_Tron_Khi_CS
             }
 
             // Little cross indicators
-            Brush crossBrush = new SolidColorBrush(Color.FromRgb(30, 41, 59));
+            Brush crossBrush = isDark ? new SolidColorBrush(Color.FromRgb(30, 41, 59)) : new SolidColorBrush(Color.FromRgb(203, 213, 225));
             for (double gx = 40; gx < 1000; gx += 80)
             {
                 for (double gy = 40; gy < 600; gy += 80)
@@ -717,15 +749,23 @@ namespace Bo_Tron_Khi_CS
 
         private void DrawPipeWithCasing(double x1, double y1, double x2, double y2, string colorHex, double thickness)
         {
+            bool isDark = BtnTheme.Content.ToString().Contains("Light");
+            string inactiveColor = isDark ? "#1E293B" : "#CBD5E1";
+
+            if (colorHex == "#1E293B")
+            {
+                colorHex = inactiveColor;
+            }
+
             Brush coreBrush = (Brush)new BrushConverter().ConvertFromString(colorHex);
-            Brush casingBrush = new SolidColorBrush(Color.FromRgb(15, 23, 42));
+            Brush casingBrush = isDark ? new SolidColorBrush(Color.FromRgb(15, 23, 42)) : new SolidColorBrush(Color.FromRgb(255, 255, 255));
             
             // Draw background casing pipe
             DrawPipe(x1, y1, x2, y2, casingBrush, thickness + 4);
             // Draw core color line
             DrawPipe(x1, y1, x2, y2, coreBrush, thickness);
             // Draw highlight reflection cap
-            if (colorHex != "#1E293B")
+            if (colorHex != inactiveColor)
             {
                 DrawPipe(x1, y1, x2, y2, new SolidColorBrush(Color.FromArgb(90, 255, 255, 255)), Math.Max(1.0, thickness / 3.0));
             }
@@ -847,7 +887,10 @@ namespace Bo_Tron_Khi_CS
 
         private void DrawParticles(double x1, double x2, double y, string colorHex, bool horiz = true)
         {
-            if (colorHex == "#1E293B" || string.IsNullOrEmpty(colorHex)) return; // pipe is inactive
+            bool isDark = BtnTheme.Content.ToString().Contains("Light");
+            string inactiveColor = isDark ? "#1E293B" : "#CBD5E1";
+
+            if (colorHex == "#1E293B" || colorHex == inactiveColor || string.IsNullOrEmpty(colorHex)) return; // pipe is inactive
 
             double span = Math.Abs(x2 - x1);
             if (span < 5) return;
@@ -885,7 +928,10 @@ namespace Bo_Tron_Khi_CS
 
         private void DrawPathParticles(Point[] path, string colorHex)
         {
-            if (colorHex == "#1E293B" || string.IsNullOrEmpty(colorHex)) return;
+            bool isDark = BtnTheme.Content.ToString().Contains("Light");
+            string inactiveColor = isDark ? "#1E293B" : "#CBD5E1";
+
+            if (colorHex == "#1E293B" || colorHex == inactiveColor || string.IsNullOrEmpty(colorHex)) return;
 
             Brush fillBrush = (Brush)new BrushConverter().ConvertFromString(colorHex);
             Brush whiteBrush = Brushes.White;
@@ -1665,8 +1711,8 @@ namespace Bo_Tron_Khi_CS
 
             BtnModeManual.Background = (Brush)new BrushConverter().ConvertFromString("#F97316");
             BtnModeManual.Foreground = Brushes.White;
-            BtnModeAuto.Background = (Brush)new BrushConverter().ConvertFromString("#1F2937");
-            BtnModeAuto.Foreground = (Brush)new BrushConverter().ConvertFromString("#9CA3AF");
+            BtnModeAuto.Background = (Brush)Application.Current.Resources["CardBrush"] ?? (Brush)new BrushConverter().ConvertFromString("#161B22");
+            BtnModeAuto.Foreground = (Brush)Application.Current.Resources["TextSecBrush"] ?? (Brush)new BrushConverter().ConvertFromString("#8B949E");
 
             SidebarColumn.Width = new GridLength(340);
             LblStatusState.Text = "Status: Manual Mode";
@@ -1677,8 +1723,8 @@ namespace Bo_Tron_Khi_CS
             _currentMode = "Auto";
             OnModeChanged(null, null);
 
-            BtnModeManual.Background = (Brush)new BrushConverter().ConvertFromString("#1F2937");
-            BtnModeManual.Foreground = (Brush)new BrushConverter().ConvertFromString("#9CA3AF");
+            BtnModeManual.Background = (Brush)Application.Current.Resources["CardBrush"] ?? (Brush)new BrushConverter().ConvertFromString("#161B22");
+            BtnModeManual.Foreground = (Brush)Application.Current.Resources["TextSecBrush"] ?? (Brush)new BrushConverter().ConvertFromString("#8B949E");
             BtnModeAuto.Background = (Brush)new BrushConverter().ConvertFromString("#F97316");
             BtnModeAuto.Foreground = Brushes.White;
 
