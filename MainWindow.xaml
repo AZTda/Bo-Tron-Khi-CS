@@ -123,7 +123,7 @@
             <RowDefinition Height="80"/>  <!-- 2. Ribbon button bar -->
             <RowDefinition Height="36"/>  <!-- 3. Toggle Mode bar -->
             <RowDefinition Height="*"/>   <!-- 4. Main workspace layout -->
-            <RowDefinition Height="28"/>  <!-- 5. Status bar -->
+            <RowDefinition Height="Auto"/>  <!-- 5. Status bar -->
         </Grid.RowDefinitions>
 
         <!-- 1. TOP MENU BAR -->
@@ -587,7 +587,7 @@
         </Grid>
 
         <!-- 5. BOTTOM STATUS BAR -->
-        <Border Grid.Row="4" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="10,2">
+        <Border Grid.Row="4" Visibility="Collapsed" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="10,2">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
