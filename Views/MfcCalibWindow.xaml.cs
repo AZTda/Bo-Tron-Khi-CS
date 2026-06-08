@@ -77,25 +77,31 @@ namespace Bo_Tron_Khi_CS
                 if (_handler.IsConnected)
                 {
                     byte ms = (byte)_config.mixing_slave;
-                    int failCount = 0;
-
+                    
+                    // Sync all 6 channels to address 45 (ADR_HOLDING_MFC_CALI_CONFIG)
+                    ushort[] caliRegs = new ushort[24];
                     for (int ch = 0; ch < 6; ch++)
                     {
-                        float minVolt = (float)(_config.mfc_min_v[ch] / 1000.0);
-                        float maxVolt = (float)(_config.mfc_max_v[ch] / 1000.0);
-
-                        // Write min_v and max_v as a single batch (4 regs) instead of 2 separate calls
-                        ushort[] minVoltRegs = ModbusHandler.FloatToRegs(minVolt);
-                        ushort[] maxVoltRegs = ModbusHandler.FloatToRegs(maxVolt);
-                        ushort[] batch = new ushort[] { minVoltRegs[0], minVoltRegs[1], maxVoltRegs[0], maxVoltRegs[1] };
-
-                        var result = _handler.TryWriteMultipleRegisters(ms, (ushort)(ch * 8 + 4), batch);
-                        if (!result.Success) failCount++;
+                        short minVoltVal = (short)_config.mfc_min_v[ch];
+                        short maxVoltVal = (short)_config.mfc_max_v[ch];
+                        double realFactor = _config.mfc_factor[ch];
+                        
+                        if (realFactor < 0.1) realFactor = 0.1;
+                        if (realFactor > 10.0) realFactor = 10.0;
+                        
+                        int factorVal = (int)Math.Round(1000.0 / realFactor);
+                        
+                        int baseIdx = ch * 4;
+                        caliRegs[baseIdx] = (ushort)minVoltVal;
+                        caliRegs[baseIdx + 1] = (ushort)maxVoltVal;
+                        caliRegs[baseIdx + 2] = (ushort)(factorVal & 0xFFFF);
+                        caliRegs[baseIdx + 3] = (ushort)((factorVal >> 16) & 0xFFFF);
                     }
 
-                    if (failCount > 0)
+                    var result = _handler.TryWriteMultipleRegisters(ms, 45, caliRegs);
+                    if (!result.Success)
                     {
-                        MessageBox.Show($"MFC calibration saved locally. Warning: {failCount} channel(s) failed to sync to device.", "Partial Success", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        MessageBox.Show($"MFC calibration saved locally. Warning: failed to sync to device: {result.ErrorMessage}", "Sync Failure", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                     else
                     {
@@ -147,38 +153,32 @@ namespace Bo_Tron_Khi_CS
                 }
                 _config.Save();
 
-                // Now compile and write the full 48 holding registers (0-47) to the board
+                // Now write the 24 registers starting at address 45 to the board
                 byte ms = (byte)_config.mixing_slave;
-                ushort[] registers = new ushort[48];
-
+                ushort[] caliRegs = new ushort[24];
                 for (int ch = 0; ch < 6; ch++)
                 {
-                    float minSccm = 0.0f;
-                    float maxSccm = (float)_config.mfc_max_sccm[ch];
-                    float minVolt = (float)(_config.mfc_min_v[ch] / 1000.0);
-                    float maxVolt = (float)(_config.mfc_max_v[ch] / 1000.0);
-
-                    ushort[] w1 = ModbusHandler.FloatToRegs(minSccm);
-                    ushort[] w2 = ModbusHandler.FloatToRegs(maxSccm);
-                    ushort[] w3 = ModbusHandler.FloatToRegs(minVolt);
-                    ushort[] w4 = ModbusHandler.FloatToRegs(maxVolt);
-
-                    int baseIdx = ch * 8;
-                    registers[baseIdx] = w1[0];
-                    registers[baseIdx + 1] = w1[1];
-                    registers[baseIdx + 2] = w2[0];
-                    registers[baseIdx + 3] = w2[1];
-                    registers[baseIdx + 4] = w3[0];
-                    registers[baseIdx + 5] = w3[1];
-                    registers[baseIdx + 6] = w4[0];
-                    registers[baseIdx + 7] = w4[1];
+                    short minVoltVal = (short)_config.mfc_min_v[ch];
+                    short maxVoltVal = (short)_config.mfc_max_v[ch];
+                    double realFactor = _config.mfc_factor[ch];
+                    
+                    if (realFactor < 0.1) realFactor = 0.1;
+                    if (realFactor > 10.0) realFactor = 10.0;
+                    
+                    int factorVal = (int)Math.Round(1000.0 / realFactor);
+                    
+                    int baseIdx = ch * 4;
+                    caliRegs[baseIdx] = (ushort)minVoltVal;
+                    caliRegs[baseIdx + 1] = (ushort)maxVoltVal;
+                    caliRegs[baseIdx + 2] = (ushort)(factorVal & 0xFFFF);
+                    caliRegs[baseIdx + 3] = (ushort)((factorVal >> 16) & 0xFFFF);
                 }
 
-                var result = _handler.TryWriteMultipleRegisters(ms, 0, registers);
+                var result = _handler.TryWriteMultipleRegisters(ms, 45, caliRegs);
                 if (result.Success)
                 {
                     string retryInfo = result.RetryCount > 0 ? $" (retried {result.RetryCount}x)" : "";
-                    MessageBox.Show($"Successfully synced all calibration limits to HMI/board.{retryInfo}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Successfully synced all calibration limits and factors to HMI/board.{retryInfo}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {

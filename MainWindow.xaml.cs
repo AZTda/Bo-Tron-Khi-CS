@@ -1503,40 +1503,51 @@ namespace Bo_Tron_Khi_CS
             try
             {
                 byte ms = (byte)_config.mixing_slave;
-                ushort[] registers = new ushort[48];
+                int failCount = 0;
 
+                // 1. Sync MFC Ranges (sccm)
                 for (int ch = 0; ch < 6; ch++)
                 {
-                    float minSccm = 0.0f;
                     float maxSccm = (float)_config.mfc_max_sccm[ch];
-                    float minVolt = (float)(_config.mfc_min_v[ch] / 1000.0);
-                    float maxVolt = (float)(_config.mfc_max_v[ch] / 1000.0);
-
-                    ushort[] w1 = ModbusHandler.FloatToRegs(minSccm);
-                    ushort[] w2 = ModbusHandler.FloatToRegs(maxSccm);
-                    ushort[] w3 = ModbusHandler.FloatToRegs(minVolt);
-                    ushort[] w4 = ModbusHandler.FloatToRegs(maxVolt);
-
-                    int baseIdx = ch * 8;
-                    registers[baseIdx] = w1[0];
-                    registers[baseIdx + 1] = w1[1];
-                    registers[baseIdx + 2] = w2[0];
-                    registers[baseIdx + 3] = w2[1];
-                    registers[baseIdx + 4] = w3[0];
-                    registers[baseIdx + 5] = w3[1];
-                    registers[baseIdx + 6] = w4[0];
-                    registers[baseIdx + 7] = w4[1];
+                    ushort[] rangeRegs = ModbusHandler.FloatToRegs(maxSccm);
+                    var rResult = _handler.TryWriteMultipleRegisters(ms, (ushort)(224 + ch * 2), rangeRegs);
+                    if (!rResult.Success) failCount++;
                 }
 
-                var result = _handler.TryWriteMultipleRegisters(ms, 0, registers);
-                if (result.Success)
+                // 2. Sync MFC Calibration (Min, Max, Factor) to address 45
+                ushort[] caliRegs = new ushort[24];
+                for (int ch = 0; ch < 6; ch++)
                 {
-                    string retryInfo = result.RetryCount > 0 ? $" (retried {result.RetryCount}x)" : "";
-                    MessageBox.Show($"Successfully synced all MFC ranges and calibration (Holding Regs 0-47) to device.{retryInfo}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    short minVoltVal = (short)_config.mfc_min_v[ch];
+                    short maxVoltVal = (short)_config.mfc_max_v[ch];
+                    double realFactor = _config.mfc_factor[ch];
+                    
+                    if (realFactor < 0.1) realFactor = 0.1;
+                    if (realFactor > 10.0) realFactor = 10.0;
+                    
+                    int factorVal = (int)Math.Round(1000.0 / realFactor);
+                    
+                    int baseIdx = ch * 4;
+                    caliRegs[baseIdx] = (ushort)minVoltVal;
+                    caliRegs[baseIdx + 1] = (ushort)maxVoltVal;
+                    caliRegs[baseIdx + 2] = (ushort)(factorVal & 0xFFFF);
+                    caliRegs[baseIdx + 3] = (ushort)((factorVal >> 16) & 0xFFFF);
+                }
+
+                var cResult = _handler.TryWriteMultipleRegisters(ms, 45, caliRegs);
+                if (!cResult.Success) failCount++;
+
+                // 3. Trigger Save Config EEPROM (register 240)
+                var saveResult = _handler.TryWriteSingleRegister(ms, 240, 1);
+                if (!saveResult.Success) failCount++;
+
+                if (failCount == 0)
+                {
+                    MessageBox.Show("Successfully synced all MFC ranges, limits and calibration factor configurations to device/EEPROM.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show($"Sync failed: {result.ErrorMessage}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Sync completed with errors. Warning: {failCount} write operation(s) failed during device sync.", "Partial Success", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
             catch (Exception ex)
