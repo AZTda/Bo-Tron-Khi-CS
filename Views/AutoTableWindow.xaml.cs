@@ -278,7 +278,140 @@ namespace Bo_Tron_Khi_CS
 
         private void OnSyncClick(object sender, RoutedEventArgs e)
         {
-            _main.SyncLimitsToEeprom();
+            if (!_main._handler.IsConnected)
+            {
+                MessageBox.Show("Device not connected. Please connect Modbus before syncing.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                // 1. Save current UI values to config first
+                if (ParseUtil.TryParseInt(TxtStableTime.Text, out int st)) _config.stable_time = st;
+                if (ParseUtil.TryParseDouble(TxtTotalFlow.Text, out double tf)) _config.total_flow = tf;
+                if (ParseUtil.TryParseInt(TxtGasOn.Text, out int go)) _config.gas_on_time = go;
+                if (ParseUtil.TryParseDouble(TxtCo1.Text, out double c1)) _config.co1 = c1;
+                if (ParseUtil.TryParseDouble(TxtCo2.Text, out double c2)) _config.co2 = c2;
+                if (ParseUtil.TryParseDouble(TxtCo3.Text, out double c3)) _config.co3 = c3;
+
+                _config.recipe_steps = _main._recipeSteps;
+                _config.Save();
+                _main.SyncConfigToUI();
+
+                byte ms = (byte)_config.mixing_slave;
+                int failCount = 0;
+
+                // 2. Sync concentration configuration parameters
+                ushort[] stableRegs = ModbusHandler.FloatToRegs((float)_config.stable_time);
+                var resStable = _main._handler.TryWriteMultipleRegisters(ms, 242, stableRegs);
+                if (!resStable.Success) failCount++;
+
+                ushort[] totalFlowRegs = ModbusHandler.FloatToRegs((float)_config.total_flow);
+                var resTotal = _main._handler.TryWriteMultipleRegisters(ms, 244, totalFlowRegs);
+                if (!resTotal.Success) failCount++;
+
+                ushort[] gasOnRegs = ModbusHandler.FloatToRegs((float)_config.gas_on_time);
+                var resGasOn = _main._handler.TryWriteMultipleRegisters(ms, 246, gasOnRegs);
+                if (!resGasOn.Success) failCount++;
+
+                ushort[] co1Regs = ModbusHandler.FloatToRegs((float)_config.co1);
+                var resCo1 = _main._handler.TryWriteMultipleRegisters(ms, 248, co1Regs);
+                if (!resCo1.Success) failCount++;
+
+                ushort[] co2Regs = ModbusHandler.FloatToRegs((float)_config.co2);
+                var resCo2 = _main._handler.TryWriteMultipleRegisters(ms, 250, co2Regs);
+                if (!resCo2.Success) failCount++;
+
+                ushort[] co3Regs = ModbusHandler.FloatToRegs((float)_config.co3);
+                var resCo3 = _main._handler.TryWriteMultipleRegisters(ms, 252, co3Regs);
+                if (!resCo3.Success) failCount++;
+
+                // Trigger Save Concentration Config to EEPROM (register 254)
+                var saveConcResult = _main._handler.TryWriteSingleRegister(ms, 254, 1);
+                if (!saveConcResult.Success) failCount++;
+
+                // 3. Sync Recipe Table Steps to address 50 in chunks of 5 steps
+                int totalSteps = _main._recipeSteps.Count;
+                // If totalSteps > 200, clamp it to 200 (TABLE_SIZE limit)
+                if (totalSteps > 200) totalSteps = 200;
+
+                for (int pos = 0; pos < totalSteps; pos += 5)
+                {
+                    // 62 registers: totalPoint (1), pos (1), 5 items * 12 regs (60)
+                    ushort[] chunkRegs = new ushort[62];
+                    chunkRegs[0] = (ushort)totalSteps;
+                    chunkRegs[1] = (ushort)pos;
+
+                    for (int j = 0; j < 5; j++)
+                    {
+                        int stepIdx = pos + j;
+                        int regBase = 2 + j * 12;
+
+                        if (stepIdx < totalSteps)
+                        {
+                            var step = _main._recipeSteps[stepIdx];
+
+                            // tempSet (int32 -> 2 regs)
+                            int tempVal = (int)Math.Round(step.Temp);
+                            chunkRegs[regBase] = (ushort)(tempVal & 0xFFFF);
+                            chunkRegs[regBase + 1] = (ushort)((tempVal >> 16) & 0xFFFF);
+
+                            // gas1 (float -> 2 regs)
+                            ushort[] g1 = ModbusHandler.FloatToRegs((float)step.Gas1Ppm);
+                            chunkRegs[regBase + 2] = g1[0];
+                            chunkRegs[regBase + 3] = g1[1];
+
+                            // gas2 (float -> 2 regs)
+                            ushort[] g2 = ModbusHandler.FloatToRegs((float)step.Gas2Ppm);
+                            chunkRegs[regBase + 4] = g2[0];
+                            chunkRegs[regBase + 5] = g2[1];
+
+                            // gas3 (float -> 2 regs)
+                            ushort[] g3 = ModbusHandler.FloatToRegs((float)step.Gas3Ppm);
+                            chunkRegs[regBase + 6] = g3[0];
+                            chunkRegs[regBase + 7] = g3[1];
+
+                            // respTime (int32 -> 2 regs)
+                            int respVal = (int)step.ExposureTime;
+                            chunkRegs[regBase + 8] = (ushort)(respVal & 0xFFFF);
+                            chunkRegs[regBase + 9] = (ushort)((respVal >> 16) & 0xFFFF);
+
+                            // recTime (int32 -> 2 regs)
+                            int recVal = (int)step.RecoveryTime;
+                            chunkRegs[regBase + 10] = (ushort)(recVal & 0xFFFF);
+                            chunkRegs[regBase + 11] = (ushort)((recVal >> 16) & 0xFFFF);
+                        }
+                        else
+                        {
+                            // Pad remaining items with zeros
+                            for (int r = 0; r < 12; r++)
+                            {
+                                chunkRegs[regBase + r] = 0;
+                            }
+                        }
+                    }
+
+                    var resTable = _main._handler.TryWriteMultipleRegisters(ms, 50, chunkRegs);
+                    if (!resTable.Success) failCount++;
+                }
+
+                // Trigger Save Auto Table to EEPROM (register 269)
+                var saveTableResult = _main._handler.TryWriteSingleRegister(ms, 269, 1);
+                if (!saveTableResult.Success) failCount++;
+
+                if (failCount == 0)
+                {
+                    MessageBox.Show("Recipe configuration and step table synced to HMI successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show($"Sync completed with errors. Warning: {failCount} write operation(s) failed during recipe sync.", "Partial Success", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Recipe sync failed: {ex.Message}", "Sync Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void OnStartAutoClick(object sender, RoutedEventArgs e)

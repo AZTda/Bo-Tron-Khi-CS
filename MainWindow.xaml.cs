@@ -16,7 +16,7 @@ namespace Bo_Tron_Khi_CS
     public partial class MainWindow : Window
     {
         internal SystemConfig _config;
-        private ModbusHandler _handler;
+        internal ModbusHandler _handler;
         private PollingEngine _poller;
         private RecipeEngine _recipeEngine;
         private Logger _logger;
