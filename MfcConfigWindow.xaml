@@ -1,0 +1,163 @@
+<Window x:Class="Bo_Tron_Khi_CS.MfcConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SCCM Hardware Configuration" 
+        Height="420" Width="680"
+        Background="{DynamicResource BgBrush}" Foreground="{DynamicResource TextPriBrush}"
+        FontFamily="Segoe UI, Arial"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPriBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Right"/>
+            <Setter Property="Height" Value="24"/>
+            <Style.Triggers>
+                <Trigger Property="IsFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPriBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,4"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="15">
+        <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource PanelBrush}" CornerRadius="6" Padding="15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Description -->
+                    <RowDefinition Height="*"/>    <!-- Config Matrix -->
+                    <RowDefinition Height="Auto"/> <!-- Action Buttons -->
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="0,0,0,10">
+                    <TextBlock Text="SCCM Hardware Config (Mixing Board Registers 0-47)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
+                    <TextBlock Text="Each channel: min-sccm, max-sccm, min-voltage, max-voltage (float, 2 regs each)" FontSize="11" Foreground="{DynamicResource TextSecBrush}" Margin="0,2,0,0"/>
+                </StackPanel>
+
+                <!-- Configuration Matrix Grid -->
+                <Grid Grid.Row="1" Margin="0,4,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="30"/>  <!-- CH -->
+                        <ColumnDefinition Width="150"/> <!-- Channel name -->
+                        <ColumnDefinition Width="*"/>   <!-- Min Flow -->
+                        <ColumnDefinition Width="*"/>   <!-- Max Flow -->
+                        <ColumnDefinition Width="*"/>   <!-- Min Voltage -->
+                        <ColumnDefinition Width="*"/>   <!-- Max Voltage -->
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="28"/> <!-- Headers -->
+                        <RowDefinition Height="30"/> <!-- MFC 1 -->
+                        <RowDefinition Height="30"/> <!-- MFC 2 -->
+                        <RowDefinition Height="30"/> <!-- MFC 3 -->
+                        <RowDefinition Height="30"/> <!-- MFC 4 -->
+                        <RowDefinition Height="30"/> <!-- MFC 5 -->
+                        <RowDefinition Height="30"/> <!-- MFC 6 -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Column Headers -->
+                    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="4">
+                        <TextBlock Text="Channel" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,1,1" Padding="4">
+                        <TextBlock Text="Min SCCM" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="3" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,1,1" Padding="4">
+                        <TextBlock Text="Max SCCM" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="4" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,1,1" Padding="4">
+                        <TextBlock Text="Min V" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="5" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,1,1" Padding="4">
+                        <TextBlock Text="Max V" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- MFC 1 Row -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="1" FontWeight="Bold" Foreground="#38BDF8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="MFC1 — Carrier" VerticalAlignment="Center"/>
+                    <TextBox x:Name="TxtMinS_1" Grid.Row="1" Grid.Column="2" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxS_1" Grid.Row="1" Grid.Column="3" Text="500.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMinV_1" Grid.Row="1" Grid.Column="4" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxV_1" Grid.Row="1" Grid.Column="5" Text="5.0" Width="80" Margin="2"/>
+
+                    <!-- MFC 2 Row -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="2" FontWeight="Bold" Foreground="#818CF8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="MFC2 — Diluent" VerticalAlignment="Center"/>
+                    <TextBox x:Name="TxtMinS_2" Grid.Row="2" Grid.Column="2" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxS_2" Grid.Row="2" Grid.Column="3" Text="500.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMinV_2" Grid.Row="2" Grid.Column="4" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxV_2" Grid.Row="2" Grid.Column="5" Text="5.0" Width="80" Margin="2"/>
+
+                    <!-- MFC 3 Row -->
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="3" FontWeight="Bold" Foreground="#EF4444" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="MFC 3 — Gas1 Low" VerticalAlignment="Center"/>
+                    <TextBox x:Name="TxtMinS_3" Grid.Row="3" Grid.Column="2" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxS_3" Grid.Row="3" Grid.Column="3" Text="50.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMinV_3" Grid.Row="3" Grid.Column="4" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxV_3" Grid.Row="3" Grid.Column="5" Text="5.0" Width="80" Margin="2"/>
+
+                    <!-- MFC 4 Row -->
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="4" FontWeight="Bold" Foreground="#3B82F6" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" Text="MFC 4 — Gas1 High" VerticalAlignment="Center"/>
+                    <TextBox x:Name="TxtMinS_4" Grid.Row="4" Grid.Column="2" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxS_4" Grid.Row="4" Grid.Column="3" Text="200.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMinV_4" Grid.Row="4" Grid.Column="4" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxV_4" Grid.Row="4" Grid.Column="5" Text="5.0" Width="80" Margin="2"/>
+
+                    <!-- MFC 5 Row -->
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="5" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="5" Grid.Column="1" Text="MFC 5 — Gas 2" VerticalAlignment="Center"/>
+                    <TextBox x:Name="TxtMinS_5" Grid.Row="5" Grid.Column="2" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxS_5" Grid.Row="5" Grid.Column="3" Text="100.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMinV_5" Grid.Row="5" Grid.Column="4" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxV_5" Grid.Row="5" Grid.Column="5" Text="5.0" Width="80" Margin="2"/>
+
+                    <!-- MFC 6 Row -->
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="6" FontWeight="Bold" Foreground="#F59E0B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Row="6" Grid.Column="1" Text="MFC 6 — Gas 3" VerticalAlignment="Center"/>
+                    <TextBox x:Name="TxtMinS_6" Grid.Row="6" Grid.Column="2" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxS_6" Grid.Row="6" Grid.Column="3" Text="100.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMinV_6" Grid.Row="6" Grid.Column="4" Text="0.0" Width="80" Margin="2"/>
+                    <TextBox x:Name="TxtMaxV_6" Grid.Row="6" Grid.Column="5" Text="5.0" Width="80" Margin="2"/>
+                </Grid>
+
+                <!-- Command Controls -->
+                <Grid Grid.Row="2" Margin="0,8,0,0">
+                    <Button x:Name="BtnRead" Content="📥 Read from Device" HorizontalAlignment="Left" Click="OnReadClick" Width="160"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="📤 Write to Device" Click="OnWriteClick" Width="160" Background="{DynamicResource AccentBrush}" Foreground="White" BorderThickness="0" Margin="0,0,8,0"/>
+                        <Button Content="Close" Click="OnCloseClick" Width="80"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

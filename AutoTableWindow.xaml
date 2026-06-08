@@ -1,0 +1,148 @@
+<Window x:Class="Bo_Tron_Khi_CS.AutoTableWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AutoTable" 
+        Height="560" Width="900"
+        Background="{DynamicResource PanelBrush}" Foreground="{DynamicResource TextPriBrush}"
+        FontFamily="Segoe UI, Arial"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <!-- Style sharing standard parameters -->
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="{DynamicResource BgBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPriBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Height" Value="24"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Config parameters frame -->
+            <RowDefinition Height="*"/>    <!-- Steps grid -->
+            <RowDefinition Height="Auto"/> <!-- Action buttons row -->
+        </Grid.RowDefinitions>
+
+        <!-- Top Config Panel -->
+        <Border Grid.Row="0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource CardBrush}" CornerRadius="4" Padding="10" Margin="0,0,0,10">
+            <StackPanel>
+                <TextBlock Text="DYNAMIC GAS MIXING CONFIGURATION" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="40"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 0: Stable, Flow, Gas On -->
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Stable Time:" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <TextBox x:Name="TxtStableTime" Grid.Row="0" Grid.Column="1" Text="10"/>
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="s" Foreground="{DynamicResource TextSecBrush}" Margin="4,0,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+
+                    <TextBlock Grid.Row="0" Grid.Column="3" Text="Total Flow:" VerticalAlignment="Center" FontWeight="Bold" Margin="10,0,0,0"/>
+                    <TextBox x:Name="TxtTotalFlow" Grid.Row="0" Grid.Column="4" Text="400.0" TextChanged="OnConfigTextChanged"/>
+                    <TextBlock Grid.Row="0" Grid.Column="5" Text="sccm" Foreground="{DynamicResource TextSecBrush}" Margin="4,0,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+
+                    <TextBlock Grid.Row="0" Grid.Column="6" Text="Gas On:" VerticalAlignment="Center" FontWeight="Bold" Margin="10,0,0,0"/>
+                    <TextBox x:Name="TxtGasOn" Grid.Row="0" Grid.Column="7" Text="10"/>
+                    <TextBlock Grid.Row="0" Grid.Column="8" Text="s" Foreground="{DynamicResource TextSecBrush}" Margin="4,0,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+
+                    <!-- Row 1: CO1, CO2, CO3 -->
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="CO1:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,8,0,0"/>
+                    <TextBox x:Name="TxtCo1" Grid.Row="1" Grid.Column="1" Text="1000.0" Margin="0,8,0,0" TextChanged="OnConfigTextChanged"/>
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="ppm" Foreground="{DynamicResource TextSecBrush}" Margin="4,8,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="CO2:" VerticalAlignment="Center" FontWeight="Bold" Margin="10,8,0,0"/>
+                    <TextBox x:Name="TxtCo2" Grid.Row="1" Grid.Column="4" Text="100.0" Margin="0,8,0,0" TextChanged="OnConfigTextChanged"/>
+                    <TextBlock Grid.Row="1" Grid.Column="5" Text="ppm" Foreground="{DynamicResource TextSecBrush}" Margin="4,8,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="6" Text="CO3:" VerticalAlignment="Center" FontWeight="Bold" Margin="10,8,0,0"/>
+                    <TextBox x:Name="TxtCo3" Grid.Row="1" Grid.Column="7" Text="1000.0" Margin="0,8,0,0" TextChanged="OnConfigTextChanged"/>
+                    <TextBlock Grid.Row="1" Grid.Column="8" Text="ppm" Foreground="{DynamicResource TextSecBrush}" Margin="4,8,0,0" VerticalAlignment="Center" FontWeight="Bold"/>
+
+                    <!-- Row 2: Number Point and XLSX Import -->
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Number Point:" VerticalAlignment="Center" FontWeight="Bold" Margin="0,8,0,0" FontSize="11"/>
+                    <TextBox x:Name="TxtNumPoint" Grid.Row="2" Grid.Column="1" Text="3" Margin="0,8,0,0" TextChanged="OnNumPointTextChanged"/>
+                    <TextBlock Grid.Row="2" Grid.Column="2" Text="steps" Foreground="{DynamicResource TextSecBrush}" Margin="4,8,0,0" VerticalAlignment="Center" FontWeight="Bold" FontSize="10"/>
+
+                    <Button Content="📥 XLSX Import" Click="OnImportExcelClick" Width="120" Height="24" Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="10,8,0,0" Style="{StaticResource SecondaryButton}"/>
+                </Grid>
+                <TextBlock x:Name="LblRangesInfo" Text="Recommended ppm range: ..." Foreground="{StaticResource WarnBrush}" FontStyle="Italic" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Middle Recipe Grid -->
+        <Border Grid.Row="1" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Margin="0,0,0,10">
+            <DataGrid x:Name="DgridRecipe" AutoGenerateColumns="False" Background="{DynamicResource BgBrush}" Foreground="{DynamicResource TextPriBrush}" 
+                      RowBackground="{DynamicResource CardBrush}" AlternatingRowBackground="{DynamicResource BgBrush}" BorderBrush="{DynamicResource BorderBrush}" 
+                      GridLinesVisibility="All" VerticalGridLinesBrush="{DynamicResource BorderBrush}" HorizontalGridLinesBrush="{DynamicResource BorderBrush}" 
+                      HeadersVisibility="Column" SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="STT" Binding="{Binding Index}" Width="50" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Temperature (°C)" Binding="{Binding Temp}" Width="150"/>
+                    <DataGridTextColumn Header="Gas1(ppm)" Binding="{Binding Gas1Ppm}" Width="120"/>
+                    <DataGridTextColumn Header="Gas2(ppm)" Binding="{Binding Gas2Ppm}" Width="120"/>
+                    <DataGridTextColumn Header="Gas3(ppm)" Binding="{Binding Gas3Ppm}" Width="120"/>
+                    <DataGridTextColumn Header="Resp.Time(s)" Binding="{Binding ExposureTime}" Width="120"/>
+                    <DataGridTextColumn Header="Rec.Time(s)" Binding="{Binding RecoveryTime}" Width="120"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Bottom Action Controls -->
+        <Border Grid.Row="2" Background="{DynamicResource CardBrush}" CornerRadius="4" Padding="10">
+            <DockPanel LastChildFill="False">
+                <!-- Left Action buttons -->
+                <Button Content="🔄 Sync to Device" Click="OnSyncClick" Width="120" VerticalAlignment="Center" DockPanel.Dock="Left" Style="{StaticResource SecondaryButton}"/>
+                <Button Content="💾 Save" Click="OnSaveClick" Width="90" Margin="8,0,0,0" VerticalAlignment="Center" DockPanel.Dock="Left" Style="{StaticResource SecondaryButton}"/>
+                <Button Content="Close" Click="OnCloseClick" Width="90" Margin="8,0,0,0" VerticalAlignment="Center" DockPanel.Dock="Left" Style="{StaticResource SecondaryButton}"/>
+
+                <!-- Right Execution buttons -->
+                <Button x:Name="BtnStopAuto" Content="⏹ DỪNG KỊCH BẢN" Click="OnStopAutoClick" Width="130" Background="{StaticResource ErrBrush}" Foreground="White" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+                <Button x:Name="BtnStartAuto" Content="START" Click="OnStartAutoClick" Width="110" Margin="0,0,8,0" Background="{StaticResource OkBrush}" Foreground="White" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+                <Button Content="- Delete Step" Click="OnDeleteStepClick" Width="100" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}"/>
+                <Button Content="+ Add Step" Click="OnAddStepClick" Width="100" Margin="0,0,8,0" VerticalAlignment="Center" DockPanel.Dock="Right" Style="{StaticResource SecondaryButton}"/>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

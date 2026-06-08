@@ -1,0 +1,606 @@
+<Window x:Class="Bo_Tron_Khi_CS.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Mix Gas-V1" 
+        Icon="pack://application:,,,/gas_mixer_logo.png"
+        Height="768" Width="1280"
+        Background="#0B0F19"
+        TextElement.Foreground="#F9FAFB"
+        FontFamily="Segoe UI, Helvetica, Arial, sans-serif"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized">
+    
+    <Window.Resources>
+        <!-- Custom Card Border Style -->
+        <Style x:Key="CardPanel" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="4"/>
+        </Style>
+
+
+
+        <!-- TabControl Style -->
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <!-- Modern Flat TabItem Style -->
+        <Style TargetType="TabItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="Foreground" Value="{DynamicResource TextPriBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="true">
+                                <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
+        <!-- Custom Menu Styling -->
+        <Style TargetType="Menu">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPriBrush}"/>
+        </Style>
+        <Style TargetType="MenuItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextPriBrush}"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+
+        <!-- Clean Button Style -->
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPriBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Dynamic ribbon button frame style -->
+        <Style x:Key="RibbonButtonFrame" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="72"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="28"/>  <!-- 1. Top Menu bar -->
+            <RowDefinition Height="80"/>  <!-- 2. Ribbon button bar -->
+            <RowDefinition Height="36"/>  <!-- 3. Toggle Mode bar -->
+            <RowDefinition Height="*"/>   <!-- 4. Main workspace layout -->
+            <RowDefinition Height="28"/>  <!-- 5. Status bar -->
+        </Grid.RowDefinitions>
+
+        <!-- 1. TOP MENU BAR -->
+        <Border Grid.Row="0" Background="{DynamicResource BgBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="5,0">
+            <DockPanel LastChildFill="False">
+                <Menu VerticalAlignment="Center" DockPanel.Dock="Left">
+                    <MenuItem Header="File" FontSize="12" FontWeight="Bold" Padding="12,2">
+                        <MenuItem Header="Save Configuration" Click="OnSaveConfigMenuClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}"/>
+                        <MenuItem Header="Exit" Click="OnExitMenuClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}"/>
+                    </MenuItem>
+                    <MenuItem Header="Tool" FontSize="12" FontWeight="Bold" Padding="12,2">
+                        <MenuItem Header="Connection Setup" Click="OnConnectModbusClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}"/>
+                        <MenuItem Header="MFC Range Settings" Click="OnMfcLimitsClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}"/>
+                        <MenuItem Header="MFC Calibration" Click="OnCalibrationKoflocClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}"/>
+                        <MenuItem Header="Chamber Protection" Click="OnChamberProtectionClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}"/>
+                        <MenuItem Header="Open AutoTable Recipe" Click="OnRecipeAutoTableClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}"/>
+                        <Separator Background="{DynamicResource BorderBrush}"/>
+                        <MenuItem Header="E5CC PID &amp; Tuning" Click="OnE5ccPidClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}"/>
+                        <MenuItem Header="SCCM Hardware Config" Click="OnSccmConfigClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}"/>
+                        <Separator Background="{DynamicResource BorderBrush}"/>
+                        <MenuItem Header="Firmware Update" Click="OnUpdateFirmwareClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}"/>
+                    </MenuItem>
+                </Menu>
+                <Button x:Name="BtnTheme" Content="☀ Light Mode" Click="OnThemeToggleClick" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPriBrush}" FontWeight="Bold" FontSize="11" Padding="10,0" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+            </DockPanel>
+        </Border>
+
+        <!-- 2. RIBBON BUTTON BAR -->
+        <Border Grid.Row="1" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0">
+                <Border Style="{StaticResource RibbonButtonFrame}" MouseLeftButtonDown="OnConnectModbusClick">
+                    <StackPanel VerticalAlignment="Center">
+                        <Viewbox Width="24" Height="24" HorizontalAlignment="Center">
+                            <Canvas Width="64" Height="64">
+                                <Border Canvas.Left="12" Canvas.Top="28" Width="28" Height="16" CornerRadius="6" BorderBrush="#3B82F6" BorderThickness="4" Background="Transparent"/>
+                                <Border Canvas.Left="24" Canvas.Top="16" Width="28" Height="16" CornerRadius="6" BorderBrush="#3B82F6" BorderThickness="4" Background="Transparent"/>
+                                <Line X1="24" Y1="28" X2="40" Y2="28" Stroke="#3B82F6" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Canvas>
+                        </Viewbox>
+                        <TextBlock Text="Connection&#x0a;Modbus" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" TextAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource RibbonButtonFrame}" MouseLeftButtonDown="OnMfcLimitsClick">
+                    <StackPanel VerticalAlignment="Center">
+                        <Viewbox Width="24" Height="24" HorizontalAlignment="Center">
+                            <Canvas Width="64" Height="64">
+                                <Line X1="12" Y1="18" X2="52" Y2="18" Stroke="#475569" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="12" Y1="32" X2="52" Y2="32" Stroke="#475569" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="12" Y1="46" X2="52" Y2="46" Stroke="#475569" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="12" Y1="18" X2="26" Y2="18" Stroke="#818CF8" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="12" Y1="32" X2="42" Y2="32" Stroke="#818CF8" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="12" Y1="46" X2="32" Y2="46" Stroke="#818CF8" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Ellipse Canvas.Left="22" Canvas.Top="14" Width="8" Height="8" Fill="#818CF8" Stroke="White" StrokeThickness="2"/>
+                                <Ellipse Canvas.Left="38" Canvas.Top="28" Width="8" Height="8" Fill="#818CF8" Stroke="White" StrokeThickness="2"/>
+                                <Ellipse Canvas.Left="28" Canvas.Top="42" Width="8" Height="8" Fill="#818CF8" Stroke="White" StrokeThickness="2"/>
+                            </Canvas>
+                        </Viewbox>
+                        <TextBlock Text="MFC&#x0a;Range" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" TextAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource RibbonButtonFrame}" MouseLeftButtonDown="OnCalibrationKoflocClick">
+                    <StackPanel VerticalAlignment="Center">
+                        <Viewbox Width="24" Height="24" HorizontalAlignment="Center">
+                            <Canvas Width="64" Height="64">
+                                <Path Data="M 16.44,47.56 A 22,22 0 1 1 47.56,47.56" Stroke="#F59E0B" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
+                                <Line X1="32" Y1="32" X2="48" Y2="16" Stroke="#F59E0B" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Ellipse Canvas.Left="29" Canvas.Top="29" Width="6" Height="6" Fill="#F59E0B"/>
+                                <Line X1="16" Y1="20" X2="22" Y2="26" Stroke="#F59E0B" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="48" Y1="20" X2="42" Y2="26" Stroke="#F59E0B" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="32" Y1="10" X2="32" Y2="18" Stroke="#F59E0B" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                            </Canvas>
+                        </Viewbox>
+                        <TextBlock Text="Calibration&#x0a;Kofloc" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" TextAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource RibbonButtonFrame}" MouseLeftButtonDown="OnRecipeAutoTableClick">
+                    <StackPanel VerticalAlignment="Center">
+                        <Viewbox Width="24" Height="24" HorizontalAlignment="Center">
+                            <Canvas Width="64" Height="64">
+                                <Border Canvas.Left="16" Canvas.Top="12" Width="32" Height="44" CornerRadius="4" BorderBrush="#10B981" BorderThickness="4" Background="Transparent"/>
+                                <Border Canvas.Left="26" Canvas.Top="6" Width="12" Height="8" CornerRadius="2" Background="#10B981"/>
+                                <Line X1="24" Y1="24" X2="42" Y2="24" Stroke="#10B981" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="24" Y1="36" X2="42" Y2="36" Stroke="#10B981" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="24" Y1="48" X2="38" Y2="48" Stroke="#10B981" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Ellipse Canvas.Left="19" Canvas.Top="22" Width="3" Height="3" Fill="#10B981"/>
+                                <Ellipse Canvas.Left="19" Canvas.Top="34" Width="3" Height="3" Fill="#10B981"/>
+                                <Ellipse Canvas.Left="19" Canvas.Top="46" Width="3" Height="3" Fill="#10B981"/>
+                            </Canvas>
+                        </Viewbox>
+                        <TextBlock Text="Recipe&#x0a;AutoTable" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" TextAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource RibbonButtonFrame}" MouseLeftButtonDown="OnSyncEepromClick">
+                    <StackPanel VerticalAlignment="Center">
+                        <Viewbox Width="24" Height="24" HorizontalAlignment="Center">
+                            <Canvas Width="64" Height="64">
+                                <Line X1="22" Y1="14" X2="22" Y2="50" Stroke="#38BDF8" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="22" Y1="14" X2="14" Y2="22" Stroke="#38BDF8" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="22" Y1="14" X2="30" Y2="22" Stroke="#38BDF8" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="42" Y1="14" X2="42" Y2="50" Stroke="#38BDF8" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="42" Y1="50" X2="34" Y2="42" Stroke="#38BDF8" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="42" Y1="50" X2="50" Y2="42" Stroke="#38BDF8" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Canvas>
+                        </Viewbox>
+                        <TextBlock Text="Sync&#x0a;Device" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" TextAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource RibbonButtonFrame}" MouseLeftButtonDown="OnUpdateFirmwareClick">
+                    <StackPanel VerticalAlignment="Center">
+                        <Viewbox Width="24" Height="24" HorizontalAlignment="Center">
+                            <Canvas Width="64" Height="64">
+                                <Border Canvas.Left="18" Canvas.Top="18" Width="28" Height="28" CornerRadius="4" BorderBrush="#9CA3AF" BorderThickness="4" Background="Transparent"/>
+                                <Border Canvas.Left="26" Canvas.Top="26" Width="12" Height="12" BorderBrush="#9CA3AF" BorderThickness="3" Background="Transparent"/>
+                                <Line X1="24" Y1="10" X2="24" Y2="18" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="32" Y1="10" X2="32" Y2="18" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="40" Y1="10" X2="40" Y2="18" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="24" Y1="46" X2="24" Y2="54" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="32" Y1="46" X2="32" Y2="54" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="40" Y1="46" X2="40" Y2="54" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="10" Y1="24" X2="18" Y2="24" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="10" Y1="32" X2="18" Y2="32" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="10" Y1="40" X2="18" Y2="40" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="46" Y1="24" X2="54" Y2="24" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="46" Y1="32" X2="54" Y2="32" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                                <Line X1="46" Y1="40" X2="54" Y2="40" Stroke="#9CA3AF" StrokeThickness="3" StrokeStartLineCap="Round"/>
+                            </Canvas>
+                        </Viewbox>
+                        <TextBlock Text="Update&#x0a;Firmware" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" TextAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- 3. TOGGLE MODE BAR -->
+        <Border Grid.Row="2" Background="{DynamicResource PanelBrush}">
+            <DockPanel LastChildFill="False" Margin="8,0">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                    <Button x:Name="BtnModeManual" Click="OnModeManualClick" Background="#F97316" Foreground="White" Width="110" Height="28" BorderThickness="0" Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Viewbox Width="16" Height="16" Margin="0,0,6,0">
+                                <Canvas Width="64" Height="64">
+                                    <Line X1="16" Y1="22" X2="48" Y2="22" Stroke="#475569" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                    <Line X1="16" Y1="42" X2="48" Y2="42" Stroke="#475569" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                    <Line X1="16" Y1="22" X2="36" Y2="22" Stroke="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                    <Line X1="16" Y1="42" X2="24" Y2="42" Stroke="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                    <Border Canvas.Left="32" Canvas.Top="14" Width="8" Height="16" CornerRadius="2" Background="White" BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" BorderThickness="2"/>
+                                    <Border Canvas.Left="20" Canvas.Top="34" Width="8" Height="16" CornerRadius="2" Background="White" BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" BorderThickness="2"/>
+                                </Canvas>
+                            </Viewbox>
+                            <TextBlock Text="Manual" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="BtnModeAuto" Click="OnModeAutoClick" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextSecBrush}" Width="110" Height="28" BorderThickness="0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Viewbox Width="16" Height="16" Margin="0,0,6,0">
+                                <Canvas Width="64" Height="64">
+                                    <Path Data="M 46,24 A 18,18 0 1 0 32,50 A 18,18 0 0 0 49,38 M 49,26 L 49,38 L 37,38" Stroke="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" StrokeThickness="4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent"/>
+                                </Canvas>
+                            </Viewbox>
+                            <TextBlock Text="Auto" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <!-- E5CC always runs in PC Mode (direct communication) -->
+            </DockPanel>
+        </Border>
+
+        <!-- Compatibility Hidden RadioButtons -->
+        <StackPanel Visibility="Collapsed">
+            <RadioButton x:Name="RadManualMode" GroupName="ModeGroup" IsChecked="True"/>
+            <RadioButton x:Name="RadAutoMode" GroupName="ModeGroup"/>
+            <RadioButton x:Name="RadManualConc" GroupName="ControlGroup" IsChecked="True"/>
+            <RadioButton x:Name="RadManualFlow" GroupName="ControlGroup"/>
+        </StackPanel>
+
+
+        <!-- 4. MAIN WORKSPACE -->
+        <Grid Grid.Row="3" Margin="8,4,8,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="SidebarColumn" Width="340"/> <!-- Width dynamically changes 340 <-> 480 -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- A. LEFT PARAMETER SIDEBAR -->
+            <Border Grid.Column="0" Style="{StaticResource CardPanel}" Margin="0,0,8,0" Padding="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/> <!-- Header "Param" -->
+                        <RowDefinition Height="*"/>    <!-- Scrollable content -->
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Height="30">
+                        <TextBlock Text="Param" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPriBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Scrollable Sidebar Panel -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <Grid>
+                            <!-- MANUAL PANEL CONTROLS -->
+                            <StackPanel x:Name="PnlManualConfig" Visibility="Visible" Margin="10">
+
+                                <!-- Temperature section (above ppm table, raw ×10 unit) -->
+                                <Border Background="{DynamicResource BorderBrush}" CornerRadius="4" Padding="8,6" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="110"/>
+                                            <ColumnDefinition Width="90"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Temp (°C):" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource TextPriBrush}"/>
+                                        <TextBox x:Name="TxtManualTemp" Grid.Column="1" Text="250" HorizontalContentAlignment="Right" Margin="4,2" KeyDown="OnManualInputKeyDown"/>
+                                        <Border Grid.Column="2" Background="{DynamicResource CardBrush}" CornerRadius="2" Height="26" Margin="4,2">
+                                            <TextBlock x:Name="LblManualTempPv" Text="0" Foreground="{DynamicResource TextPriBrush}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Gas concentration table -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="100"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/> <!-- Titles -->
+                                        <RowDefinition Height="Auto"/> <!-- Gas 1 -->
+                                        <RowDefinition Height="Auto"/> <!-- Gas 2 -->
+                                        <RowDefinition Height="Auto"/> <!-- Gas 3 -->
+                                        <RowDefinition Height="Auto"/> <!-- Time -->
+                                        <RowDefinition Height="Auto"/> <!-- Display ComboBox -->
+                                        <RowDefinition Height="Auto"/> <!-- Control ComboBox -->
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Table headers -->
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Parameter" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" Margin="0,4,0,8"/>
+                                    <TextBlock x:Name="LblHdrSetting" Grid.Row="0" Grid.Column="1" Text="Setting (ppm)" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center" Margin="0,4,0,8"/>
+                                    <TextBlock x:Name="LblHdrCurrent" Grid.Row="0" Grid.Column="2" Text="Current (ppm)" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center" Margin="0,4,0,8"/>
+
+                                    <!-- Gas 1 SP and PV -->
+                                    <TextBlock x:Name="LblGas1Range" Grid.Row="1" Grid.Column="0" Text="Conc. Gas 1:&#x0a;(...)" FontWeight="Bold" VerticalAlignment="Center" Margin="0,4"/>
+                                    <TextBox x:Name="TxtManualGas1" Grid.Row="1" Grid.Column="1" Text="0.0" HorizontalContentAlignment="Right" Margin="4" KeyDown="OnManualInputKeyDown"/>
+                                    <Border Grid.Row="1" Grid.Column="2" Background="{DynamicResource BorderBrush}" CornerRadius="2" Height="26" Margin="4">
+                                        <TextBlock x:Name="LblManualGas1Pv" Text="0.0" Foreground="{DynamicResource TextPriBrush}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Gas 2 SP and PV -->
+                                    <TextBlock x:Name="LblGas2Range" Grid.Row="2" Grid.Column="0" Text="Conc. Gas 2:&#x0a;(...)" FontWeight="Bold" VerticalAlignment="Center" Margin="0,4"/>
+                                    <TextBox x:Name="TxtManualGas2" Grid.Row="2" Grid.Column="1" Text="0.0" HorizontalContentAlignment="Right" Margin="4" KeyDown="OnManualInputKeyDown"/>
+                                    <Border Grid.Row="2" Grid.Column="2" Background="{DynamicResource BorderBrush}" CornerRadius="2" Height="26" Margin="4">
+                                        <TextBlock x:Name="LblManualGas2Pv" Text="0.0" Foreground="{DynamicResource TextPriBrush}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Gas 3 SP and PV -->
+                                    <TextBlock x:Name="LblGas3Range" Grid.Row="3" Grid.Column="0" Text="Conc. Gas 3:&#x0a;(...)" FontWeight="Bold" VerticalAlignment="Center" Margin="0,4"/>
+                                    <TextBox x:Name="TxtManualGas3" Grid.Row="3" Grid.Column="1" Text="0.0" HorizontalContentAlignment="Right" Margin="4" KeyDown="OnManualInputKeyDown"/>
+                                    <Border Grid.Row="3" Grid.Column="2" Background="{DynamicResource BorderBrush}" CornerRadius="2" Height="26" Margin="4">
+                                        <TextBlock x:Name="LblManualGas3Pv" Text="0.0" Foreground="{DynamicResource TextPriBrush}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Time PV -->
+                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Time(s):" FontWeight="Bold" VerticalAlignment="Center" Margin="0,6"/>
+                                    <Border Grid.Row="4" Grid.Column="2" Background="{DynamicResource BorderBrush}" CornerRadius="2" Height="26" Margin="4">
+                                        <TextBlock x:Name="LblManualTime" Text="0" Foreground="{DynamicResource TextPriBrush}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <!-- Display type selection -->
+                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Display type:" FontWeight="Bold" VerticalAlignment="Center" Margin="0,6"/>
+                                    <ComboBox x:Name="CbDispType" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Margin="4" SelectionChanged="OnDispTypeSelectionChanged">
+                                        <ComboBoxItem Content="Concentration response" IsSelected="True"/>
+                                        <ComboBoxItem Content="Flow response"/>
+                                    </ComboBox>
+
+                                    <!-- Control type selection -->
+                                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Control type:" FontWeight="Bold" VerticalAlignment="Center" Margin="0,6"/>
+                                    <ComboBox x:Name="CbCtrlType" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Margin="4" SelectionChanged="OnCtrlTypeSelectionChanged">
+                                        <ComboBoxItem Content="Concentration" IsSelected="True"/>
+                                        <ComboBoxItem Content="Flow"/>
+                                    </ComboBox>
+                                </Grid>
+
+                                <!-- Action Buttons Frame -->
+                                <Grid Margin="0,15,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="85"/>
+                                        <ColumnDefinition Width="85"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button x:Name="BtnManualStart" Grid.Column="0" Content="▶ Start" Background="{DynamicResource AccentBrush}" Foreground="White" Click="OnStartClick" Margin="0,0,4,0"/>
+                                    <Button x:Name="BtnManualValve" Grid.Column="1" Content="Valve:Off" Click="OnManualValveClick" Margin="2,0"/>
+                                    <Button x:Name="BtnManualPump" Grid.Column="2" Content="Pump:Off" Click="OnManualPumpClick" Margin="4,0,0,0"/>
+                                </Grid>
+
+                                <!-- Big Temp Display Status Card -->
+                                <Border Style="{StaticResource CardPanel}" Margin="0,15,0,0" Padding="12" Background="{DynamicResource CardBrush}">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock x:Name="LblTempPvBig" Text="25.0 °C" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" HorizontalAlignment="Center" Margin="0,4"/>
+                                        <TextBlock x:Name="LblStatusState" Text="Status: Manual Mode" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextPriBrush}" HorizontalAlignment="Center" Margin="0,4"/>
+                                        <TextBlock x:Name="LblSimMode" Text="" FontWeight="Bold" FontSize="12" FontStyle="Italic" Foreground="{DynamicResource WarnBrush}" HorizontalAlignment="Center" Margin="0,2"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Red Valve Shutdown Button -->
+                                <Button x:Name="BtnValveOff" Content="🚨 EMERGENCY VALVE SHUTDOWN" Background="{DynamicResource ErrBrush}" Foreground="White" FontSize="13" FontWeight="Bold" Click="OnEmergencyClick" Height="38" Margin="0,12,0,0"/>
+                            </StackPanel>
+
+                            <!-- AUTO PANEL CONTROLS -->
+                            <StackPanel x:Name="PnlAutoConfig" Visibility="Collapsed" Margin="10">
+                                <!-- Status Display Card -->
+                                <Border Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="0">
+                                    <StackPanel>
+                                        <Border Background="{DynamicResource BorderBrush}" Height="28">
+                                            <TextBlock Text="Current Status" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <Grid Margin="6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Temp(°C)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Gas1(ppm)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="2" Text="Gas2(ppm)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="3" Text="Gas3(ppm)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center"/>
+
+                                            <TextBlock x:Name="LblAutoTempPv" Grid.Row="1" Grid.Column="0" Text="0" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" HorizontalAlignment="Center" Margin="0,4"/>
+                                            <TextBlock x:Name="LblAutoGas1Pv" Grid.Row="1" Grid.Column="1" Text="0" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" HorizontalAlignment="Center" Margin="0,4"/>
+                                            <TextBlock x:Name="LblAutoGas2Pv" Grid.Row="1" Grid.Column="2" Text="0" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" HorizontalAlignment="Center" Margin="0,4"/>
+                                            <TextBlock x:Name="LblAutoGas3Pv" Grid.Row="1" Grid.Column="3" Text="0" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" HorizontalAlignment="Center" Margin="0,4"/>
+                                        </Grid>
+                                        <TextBlock x:Name="LblAutoPhaseStatus" Text="Stop" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPriBrush}" HorizontalAlignment="Center" Margin="0,4,0,8"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Parameters settings card -->
+                                <Border Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Margin="0,8,0,4" Padding="8">
+                                    <StackPanel>
+                                        <TextBlock Text="Scenario Parameters Settings" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecBrush}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65"/>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="75"/>
+                                                <ColumnDefinition Width="70"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Row 0: Stable, Gas On -->
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Stable(s):" VerticalAlignment="Center" Margin="2,4"/>
+                                            <TextBox x:Name="TxtStableTime" Grid.Row="0" Grid.Column="1" Text="10" HorizontalContentAlignment="Right" Margin="2" Height="22" TextChanged="OnAutoConfigTextChanged"/>
+                                            
+                                            <TextBlock Grid.Row="0" Grid.Column="2" Text="Gas On(s):" VerticalAlignment="Center" Margin="6,4,2,4"/>
+                                            <TextBox x:Name="TxtGasOnTime" Grid.Row="0" Grid.Column="3" Text="10" HorizontalContentAlignment="Right" Margin="2" Height="22" TextChanged="OnAutoConfigTextChanged"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Recipe step table Grid -->
+                                <Border Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" Height="260" Margin="0,4,0,4">
+                                    <DataGrid x:Name="DgridRecipe" AutoGenerateColumns="False" Background="#0F172A" Foreground="{DynamicResource TextPriBrush}" 
+                                              RowBackground="{DynamicResource CardBrush}" AlternatingRowBackground="#0F172A" BorderBrush="{DynamicResource BorderBrush}" 
+                                              GridLinesVisibility="All" VerticalGridLinesBrush="{DynamicResource BorderBrush}" HorizontalGridLinesBrush="{DynamicResource BorderBrush}" 
+                                              HeadersVisibility="Column" FontSize="11">
+                                        <DataGrid.ContextMenu>
+                                            <ContextMenu Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}">
+                                                <MenuItem Header="Add Step" Click="OnAddStepClick"/>
+                                                <MenuItem Header="Delete Step" Click="OnDeleteStepClick"/>
+                                                <MenuItem Header="Clear All Steps" Click="OnClearAllStepsClick"/>
+                                                <Separator Background="{DynamicResource BorderBrush}"/>
+                                                <MenuItem Header="Import Excel" Click="OnImportExcelClick"/>
+                                                <MenuItem Header="Sync to Device" Click="OnSyncEepromClick"/>
+                                                <MenuItem Header="Save Configuration" Click="OnSaveConfigMenuClick"/>
+                                            </ContextMenu>
+                                        </DataGrid.ContextMenu>
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="STT" Binding="{Binding Index}" Width="30" IsReadOnly="True"/>
+                                            <DataGridTextColumn Header="Temp(°C)" Binding="{Binding Temp}" Width="65"/>
+                                            <DataGridTextColumn Header="Gas1(ppm)" Binding="{Binding Gas1Ppm}" Width="65"/>
+                                            <DataGridTextColumn Header="Gas2(ppm)" Binding="{Binding Gas2Ppm}" Width="65"/>
+                                            <DataGridTextColumn Header="Gas3(ppm)" Binding="{Binding Gas3Ppm}" Width="65"/>
+                                            <DataGridTextColumn Header="Resp(s)" Binding="{Binding ExposureTime}" Width="60"/>
+                                            <DataGridTextColumn Header="Rec(s)" Binding="{Binding RecoveryTime}" Width="60"/>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Border>
+
+                                <!-- Step Edit Buttons -->
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Content="+ Add" Click="OnAddStepClick" Margin="0,0,2,0" Height="26" FontSize="11"/>
+                                    <Button Grid.Column="1" Content="- Delete" Click="OnDeleteStepClick" Margin="2,0" Height="26" FontSize="11"/>
+                                    <Button Grid.Column="2" Content="🗑 Clear" Click="OnClearAllStepsClick" Margin="2,0" Foreground="{DynamicResource ErrBrush}" Height="26" FontSize="11"/>
+                                    <Button Grid.Column="3" Content="📥 Import" Click="OnImportExcelClick" Margin="2,0,0,0" Height="26" FontSize="11"/>
+                                </Grid>
+
+                                 <!-- Big Start Button -->
+                                 <Button x:Name="BtnAutoStart" Content="Start" Click="OnStartClick" Background="#DBEAFE" Foreground="#1E40AF" Height="36" FontSize="15" FontWeight="Bold" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- B. RIGHT WORKSPACE CONTENT -->
+            <Grid Grid.Column="1">
+                <TabControl Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Foreground="{DynamicResource TextPriBrush}">
+                    <!-- Tab 1: Scada canvas animation view -->
+                    <TabItem Header="⬡ Scada" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}" Padding="15,4">
+                        <Grid Background="{DynamicResource BgBrush}">
+                            <Canvas x:Name="ScadaCanvas" Background="#080C14" ClipToBounds="True"/>
+                            
+                            <!-- Simulator status tag in top right of SCADA -->
+                            <Border VerticalAlignment="Top" HorizontalAlignment="Right" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="8,4" CornerRadius="4" Margin="6">
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse x:Name="ElStatusTagDot" Width="8" Height="8" Fill="{DynamicResource OkBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <TextBlock x:Name="TxtActiveStatus" Text="Virtual Simulator Active" FontSize="11" Foreground="{DynamicResource TextPriBrush}" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- Tab 2: Live Plotting Chart -->
+                    <TabItem Header="📈 Chart Realtime" Background="{DynamicResource CardBrush}" Foreground="{DynamicResource TextPriBrush}" Padding="15,4">
+                        <Grid Background="{DynamicResource CardBrush}" Margin="5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="45"/>
+                            </Grid.RowDefinitions>
+
+                            <Border Grid.Row="0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="#0F172A">
+                                <Canvas x:Name="ChartCanvas" ClipToBounds="True"/>
+                            </Border>
+
+                            <!-- Bottom chart toolbar panel -->
+                            <Border Grid.Row="1" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="5">
+                                <DockPanel LastChildFill="False">
+                                    <ComboBox x:Name="CbChartMode" Width="180" Height="25" SelectionChanged="OnChartModeChanged" VerticalAlignment="Center" DockPanel.Dock="Left">
+                                        <ComboBoxItem Content="Display: SCCM (Flow)" IsSelected="True"/>
+                                        <ComboBoxItem Content="Display: ppm (Concentration)"/>
+                                    </ComboBox>
+                                    <Button Content="🗑 Clear Chart" Click="OnClearChartClick" Style="{x:Null}" Background="{DynamicResource PanelBrush}" Foreground="{DynamicResource TextPriBrush}" Height="25" Width="120" Margin="10,0,0,0" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                                    <Button Content="🖼 Export Chart PNG" Click="OnExportChartClick" Background="{DynamicResource AccentBrush}" Foreground="White" Height="25" Width="140" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+                                </DockPanel>
+                            </Border>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Grid>
+
+        <!-- 5. BOTTOM STATUS BAR -->
+        <Border Grid.Row="4" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="10,2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="0">
+                    <TextBlock x:Name="TxtStatusLeft" Text="System Ready" Foreground="{DynamicResource TextSecBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,20,0"/>
+                    <TextBlock x:Name="LblMixConnStatus" Text="● Mixing Disconnected" Foreground="{DynamicResource TextSecBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,20,0"/>
+                    <TextBlock x:Name="LblDacConnStatus" Text="● DAC Disconnected" Foreground="{DynamicResource TextSecBrush}" FontSize="11" FontWeight="Bold" Margin="0,0,20,0"/>
+                    <TextBlock x:Name="LblE5Status" Text="" Foreground="{DynamicResource TextSecBrush}" FontSize="11" FontWeight="Bold"/>
+                </StackPanel>
+                <TextBlock Text="Mix Gas-V1" Foreground="{DynamicResource TextSecBrush}" FontSize="11" VerticalAlignment="Center" Grid.Column="1"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
