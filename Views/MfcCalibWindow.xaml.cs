@@ -116,6 +116,81 @@ namespace Bo_Tron_Khi_CS
             }
         }
 
+        private void OnSyncHmiClick(object sender, RoutedEventArgs e)
+        {
+            if (!_handler.IsConnected)
+            {
+                MessageBox.Show("Device not connected. Please connect Modbus before syncing.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                // First, save current inputs to configuration memory
+                double[] minV = new double[6];
+                double[] maxV = new double[6];
+                double[] factors = new double[6];
+
+                for (int ch = 1; ch <= 6; ch++)
+                {
+                    GetFields(ch, out TextBox txtMin, out TextBox txtMax, out TextBox txtFac);
+                    minV[ch - 1] = ParseUtil.ParseDouble(txtMin.Text);
+                    maxV[ch - 1] = ParseUtil.ParseDouble(txtMax.Text);
+                    factors[ch - 1] = ParseUtil.ParseDouble(txtFac.Text);
+                }
+
+                for (int i = 0; i < 6; i++)
+                {
+                    _config.mfc_min_v[i] = minV[i];
+                    _config.mfc_max_v[i] = maxV[i];
+                    _config.mfc_factor[i] = factors[i];
+                }
+                _config.Save();
+
+                // Now compile and write the full 48 holding registers (0-47) to the board
+                byte ms = (byte)_config.mixing_slave;
+                ushort[] registers = new ushort[48];
+
+                for (int ch = 0; ch < 6; ch++)
+                {
+                    float minSccm = 0.0f;
+                    float maxSccm = (float)_config.mfc_max_sccm[ch];
+                    float minVolt = (float)(_config.mfc_min_v[ch] / 1000.0);
+                    float maxVolt = (float)(_config.mfc_max_v[ch] / 1000.0);
+
+                    ushort[] w1 = ModbusHandler.FloatToRegs(minSccm);
+                    ushort[] w2 = ModbusHandler.FloatToRegs(maxSccm);
+                    ushort[] w3 = ModbusHandler.FloatToRegs(minVolt);
+                    ushort[] w4 = ModbusHandler.FloatToRegs(maxVolt);
+
+                    int baseIdx = ch * 8;
+                    registers[baseIdx] = w1[0];
+                    registers[baseIdx + 1] = w1[1];
+                    registers[baseIdx + 2] = w2[0];
+                    registers[baseIdx + 3] = w2[1];
+                    registers[baseIdx + 4] = w3[0];
+                    registers[baseIdx + 5] = w3[1];
+                    registers[baseIdx + 6] = w4[0];
+                    registers[baseIdx + 7] = w4[1];
+                }
+
+                var result = _handler.TryWriteMultipleRegisters(ms, 0, registers);
+                if (result.Success)
+                {
+                    string retryInfo = result.RetryCount > 0 ? $" (retried {result.RetryCount}x)" : "";
+                    MessageBox.Show($"Successfully synced all calibration limits to HMI/board.{retryInfo}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show($"Sync failed: {result.ErrorMessage}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Sync failed:\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void OnCloseClick(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

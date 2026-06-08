@@ -142,10 +142,11 @@
                 <!-- Actions -->
                 <Grid Grid.Row="3" Margin="0,10,0,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                        <Button Content="Save" Click="OnSaveClick" Width="90" Background="{DynamicResource AccentBrush}" Foreground="White" BorderThickness="0" Margin="0,0,8,0"/>
-                        <Button Content="Reset Kofloc Defaults" Click="OnResetDefaultsClick" Width="160"/>
+                        <Button Content="Save" Click="OnSaveClick" Width="80" Background="{DynamicResource AccentBrush}" Foreground="White" BorderThickness="0" Margin="0,0,8,0"/>
+                        <Button Content="Reset Defaults" Click="OnResetDefaultsClick" Width="130" Margin="0,0,8,0"/>
+                        <Button Content="Sync to HMI" Click="OnSyncHmiClick" Width="120" Background="#10B981" Foreground="White" BorderThickness="0"/>
                     </StackPanel>
-                    <Button Content="Close" Click="OnCloseClick" Width="90" HorizontalAlignment="Right"/>
+                    <Button Content="Close" Click="OnCloseClick" Width="85" HorizontalAlignment="Right"/>
                 </Grid>
             </Grid>
         </Border>
