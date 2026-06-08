@@ -1756,6 +1756,10 @@ namespace Bo_Tron_Khi_CS
         private void OnCtrlTypeSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateSidebarHeaders();
+            if (_manualRunning)
+            {
+                ApplyManualFlows();
+            }
         }
 
         private void UpdateSidebarHeaders()
@@ -1883,8 +1887,6 @@ namespace Bo_Tron_Khi_CS
                 _manualTimer.Stop();
                 return;
             }
-
-            ApplyManualFlows();
 
             // Update elapsed time
             var elapsed = (int)(DateTime.Now - _manualStartTime).TotalSeconds;
