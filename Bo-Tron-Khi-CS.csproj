@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="gas_mixer_logo.png" />
+    <Resource Include="Assets\gas_mixer_logo.png" />
   </ItemGroup>
 
 </Project>

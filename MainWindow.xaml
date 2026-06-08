@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Mix Gas-V1" 
-        Icon="pack://application:,,,/gas_mixer_logo.png"
+        Icon="pack://application:,,,/Assets/gas_mixer_logo.png"
         Height="768" Width="1280"
         Background="#0B0F19"
         TextElement.Foreground="#F9FAFB"
