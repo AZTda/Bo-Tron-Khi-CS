@@ -250,8 +250,8 @@ namespace Bo_Tron_Khi_CS
         }
 
         // ===================================================
-        // APPLY STEP — V5: firmware tự tính flow từ gas ppm
-        // App chỉ gửi: temp (qua HR 202), gas1/2/3 ppm, mode=Conc, isRun=1
+        // APPLY STEP — V5: firmware auto-calculates flow from gas ppm
+        // App only sends: temp (via HR 202), gas1/2/3 ppm, mode=Conc, isRun=1
         // ===================================================
         private void ApplyStepFlows(RecipeStep step, byte ms, byte es, CancellationToken ct)
         {
@@ -260,7 +260,7 @@ namespace Bo_Tron_Khi_CS
             _handler.TryWriteSingleRegister(ms, 202, tempReg, ct);
 
             // Write conc_mfc_value_t: mode=1 (Concentration), isRun=1, gas ppm
-            // Firmware tự tính flow từ gas ppm + concCfg (totalFlow, co1, co2, co3)
+            // Firmware auto-calculates flow from gas ppm + concCfg (totalFlow, co1, co2, co3)
             WriteConcMfcValue(ms, ct, 1, 1, step.Gas1Ppm, step.Gas2Ppm, step.Gas3Ppm);
         }
 

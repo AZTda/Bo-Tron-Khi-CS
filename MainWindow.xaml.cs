@@ -521,7 +521,7 @@ namespace Bo_Tron_Khi_CS
             double info_y = 530;
 
             // Van (Valve) state box
-            string valveLabel = _valveRelay1 ? "VAN: MỞ (Mix → Chamber)" : "VAN: ĐÓNG (Carrier → Chamber)";
+            string valveLabel = _valveRelay1 ? "VALVE: OPEN (Mix → Chamber)" : "VALVE: CLOSED (Carrier → Chamber)";
             string valveBoxBg = _valveRelay1 ? "#042F1A" : "#081E3F";
             string valveBoxBorder = _valveRelay1 ? "#10B981" : "#3B82F6";
             string valveBoxText = _valveRelay1 ? "#10B981" : "#93C5FD";
